@@ -1,0 +1,36 @@
+import asyncio
+from enum import Enum
+
+from fastapi_storages import FileSystemStorage
+from fastapi_storages.integrations.sqlalchemy import ImageType
+from sqlalchemy import BigInteger, Enum as SqlEnum, String, VARCHAR, ForeignKey, Integer, CheckConstraint, select, func
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy_file import ImageField
+
+from apps.models.database import BaseModel, db
+from apps.models.users import User
+
+
+class ShopCategory(BaseModel):
+    name: Mapped[str] = mapped_column(VARCHAR(255))
+    shop: Mapped[list['Shop']] = relationship('Shop', lazy='selectin', back_populates='shop_category')
+
+
+class Shop(BaseModel):
+    class WorkTime(str, Enum):
+        OPEN = 'open'
+        CLOSE = 'close'
+
+    name: Mapped[str] = mapped_column(VARCHAR(255))
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
+    shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
+    work_time: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
+    photos: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
+    shop_category: Mapped['ShopCategory'] = relationship('ShopCategory', lazy='selectin', back_populates='shop')
+    shop_photos: Mapped['ShopPhoto'] = relationship('ShopPhoto', lazy='selectin', back_populates='shop')
+
+
+class ShopPhoto(BaseModel):
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
+    shop: Mapped['Shop'] = relationship('Shop', lazy='selectin', back_populates='shop_photos')
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
