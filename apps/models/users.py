@@ -32,7 +32,7 @@ class User(BaseModel):
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
     orders: Mapped[list['Order']] = relationship('Order', lazy='selectin', back_populates='order_from_user')
     carts: Mapped[list["Cart"]] = relationship('Cart', lazy='selectin', back_populates='cart_from_user')
-    products: Mapped[list['Product']] = relationship('Product', back_populates='owner')
+    my_shops: Mapped[list["Shop"]] = relationship('Shop', lazy='selectin', back_populates='owner')
 
     def __str__(self):
         return super().__str__() + f" - {self.username}"

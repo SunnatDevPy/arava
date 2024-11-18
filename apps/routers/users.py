@@ -1,11 +1,114 @@
-from fastapi import APIRouter
+from typing import Annotated, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Form
+from pydantic import BaseModel
 
 from apps.models import User
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
 
-@user_router.get("/profile", name='user_profile')
-async def user_profile(user_id: int):
+class UserAdd(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    username: Optional[str] = None
+    contact: str
+    is_active: Optional[bool] = False
+    status: Optional[str] = "USER"
+    long: Optional[float]
+    lat: Optional[float]
+
+
+# class UserList(BaseModel):
+#     id: Optional[int] = None
+#     first_name: str
+#     last_name: str
+#     username: Optional[str] = None
+#     contact: str
+#     is_active: Optional[bool] = False
+#     status: Optional[str] = "USER"
+#     long: Optional[float]
+#     lat: Optional[float]
+
+@user_router.post("", name="Create User")
+async def user_add(operator_id: int, user_create: Annotated[UserAdd, Depends()]):
+    user = await User.get(operator_id)
+    if user:
+        if user.status.value in ['moderator', "admin"]:
+            await User.create(**user_create.dict())
+            return {'ok': True}
+        else:
+            raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.get('', name="List User")
+async def user_list():
+    users = await User.all()
+    return users
+
+
+@user_router.get("/detail", name="Detail User")
+async def user_detail(user_id: int):
     user = await User.get(user_id)
-    return user
+    if user:
+        return {"user": user}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+# coin energy update
+@user_router.patch("/detail", name="Update User")
+async def user_patch_update(user_id: Optional[int],
+                            first_name: Optional[str] = Form(default=None),
+                            last_name: Optional[str] = Form(default=None),
+                            contact: Optional[str] = Form(default=None),
+                            is_active: Optional[bool] = Form(default=None),
+                            long: Optional[float] = Form(default=None),
+                            lat: Optional[float] = Form(default=None)):
+    user = await User.get(user_id)
+    if user:
+        update_data = {k: v for k, v in {"first_name": first_name,
+                                         "last_name": last_name,
+                                         "contact": contact,
+                                         "is_active": is_active,
+                                         "long": long,
+                                         "lat": lat} if v is not None}
+        if update_data:
+            await User.update(user.id, **update_data)
+            return {"ok": True, "data": update_data}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.patch("/status", name="Update Status")
+async def user_add(operator_id: int, user_id: int = Form(), status: str = Form()):
+    user = await User.get(operator_id)
+    if user:
+        if user.status.value in ['moderator', "admin"]:
+            try:
+                await User.update(user_id, status=status)
+                return {'ok': True}
+            except:
+                raise HTTPException(status_code=404, detail="Status kiritishda xatolik")
+        else:
+            raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.delete("/")
+async def user_delete(operator_id: int, user_id: int):
+    user = await User.get(operator_id)
+    if user:
+        if user.status.value in ['moderator', "admin"]:
+            await User.delete(user_id)
+            return {"ok": True, 'id': user_id}
+        else:
+            raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")

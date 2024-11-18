@@ -13,7 +13,8 @@ from starlette.responses import FileResponse, RedirectResponse
 
 from apps.admin import ProductAdmin, CategoryAdmin, ProductPhotoAdmin, MainPhotoAdmin
 from apps.models import db
-from apps.routers import product_router, generate_router, user_router, auth_router
+from apps.routers import product_router, generate_router, user_router, auth_router, shop_category_router, \
+    main_photos_router
 from apps.routers.shop import shop_router
 from config import conf
 
@@ -29,6 +30,8 @@ async def lifespan(app: FastAPI):
     app.include_router(product_router)
     app.include_router(generate_router)
     app.include_router(shop_router)
+    app.include_router(shop_category_router)
+    app.include_router(main_photos_router)
     await db.create_all()
     yield
 

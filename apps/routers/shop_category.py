@@ -1,17 +1,11 @@
-import os
-from pathlib import Path
-from typing import List
-
 from fastapi import APIRouter
 from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
-from starlette.responses import FileResponse
 
 from apps.models import ShopCategory
-from apps.models.shop_model import Shop
 
-shop_category_router = APIRouter(prefix='/shop', tags=['Shop'])
+shop_category_router = APIRouter(prefix='/shop-category', tags=['Shop-Category'])
 
 
 class CreateCategory(BaseModel):
@@ -28,20 +22,19 @@ class UpdateCategory(BaseModel):
 
 
 # List Shop categoriya va Shoplar
-@shop_category_router.get(path='/', name="Shops")
+@shop_category_router.get(path='/', name="All shop category")
 async def list_category_shop():
     shop_category = await ShopCategory.all()
-    shops = await Shop.all()
-    return {'shop_category': shop_category, "shops": shops}
+    return {'shop_category': shop_category}
 
 
 # Get Shop categoriya TODO
-@shop_category_router.get(path='/shop-category-products', name="Get Shop Category and from Products")
+@shop_category_router.get(path='/products', name="Get Shop Category and from Products")
 async def list_category_shop(item: GetCategory):
     category = await ShopCategory.get(item.id)
     if category:
-        products = category.products
-        return {'shop-category': category, "products": products}
+        shops = category.shop
+        return {'shop-category': category, "shops": shops}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -59,7 +52,7 @@ async def list_category_shop(item: GetCategory):
 async def list_category_shop(item: CreateCategory):
     try:
         category = await ShopCategory.create(name=item.name)
-        return {'shop-category': category}
+        return {'shop-category': await category}
     except:
         return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
 

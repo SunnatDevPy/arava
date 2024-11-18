@@ -1,43 +1,15 @@
 import os
-from pathlib import Path
-from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
-from pydantic import BaseModel
 from starlette import status
 from starlette.responses import FileResponse
 
-from apps.models import ShopCategory
-from apps.models.shop_model import Shop
+from apps.models import ShopCategory, User, Shop
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
-# @user_router.get("profile", name='user_profile')
-# async def user_profile(user_id: int):
-#     user = await User.get(user_id)
-#     return user
 
-'''
-========================================================
-Shop Kategoriyalar bilan ishlash
-'''
-
-
-class CreateCategory(BaseModel):
-    name: str
-
-
-class GetCategory(BaseModel):
-    id: int
-
-
-class UpdateCategory(BaseModel):
-    id: int
-    name: str
-
-
-# Banner rasmlarni olish
 @shop_router.get("/photos", name="Banner photos")
 async def list_photo_banner():
     list_ = []
@@ -55,17 +27,16 @@ async def list_photo_banner():
 
 
 # List Shop categoriya va Shoplar
-@shop_router.get(path='/', name="Shops")
+@shop_router.get(path='', name="Shops")
 async def list_category_shop():
-    shop_category = await ShopCategory.all()
     shops = await Shop.all()
-    return {'shop_category': shop_category, "shops": Shop}
+    return {"shops": shops}
 
 
 # Get Shop categoriya TODO
-@shop_router.get(path='/shop-category', name="Get Shop Category from Products")
-async def list_category_shop(item: GetCategory):
-    category = await ShopCategory.get(item.id)
+@shop_router.get(path='/detail', name="Get Shop")
+async def list_category_shop(shop_id: int):
+    category = await Shop.get(shop_id)
     if category:
         products = category.products
         return {'shop-category': category, "products": products}
@@ -73,22 +44,53 @@ async def list_category_shop(item: GetCategory):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@shop_router.post(path='/shop-category', name="Create Shop Category")
-async def list_category_shop(item: CreateCategory):
-    try:
-        category = await ShopCategory.create(name=item.name)
-        return {'shop-category': category}
-    except:
-        return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
+@shop_router.post(path='/', name="Create Shop")
+async def list_category_shop(operator_id: int,
+                             name: str = Form(...),
+                             owner_id: int = Form(...),
+                             shop_category_id: int = Form(...),
+                             photo: UploadFile = File(...),
+                             ):
+    user = await User.get(operator_id)
+    if not photo.content_type.startswith("image/"):
+        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+    if user:
+        if user.status.value in ['moderator', "admin"]:
+            await Shop.create(name=name, owner_id=owner_id, work_time='CLOSE', photos=photo,
+                              shop_category_id=shop_category_id)
+            return {"ok": True}
+        else:
+            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-# Update Shop categoriya
-@shop_router.patch(path='/shop-category', name="Update Shop Category")
-async def list_category_shop(item: UpdateCategory):
-    category = await ShopCategory.get(item.id)
-    if category:
-        await ShopCategory.update(category.id, name=item.name)
-        return {'shop-category': category}
+# Update Shop
+@shop_router.patch(path='/', name="Update Shop")
+async def list_category_shop(operator_id: int,
+                             shop_id: int = Form(),
+                             name: str | None = Form(default=None),
+                             owner_id: int | None = Form(...),
+                             shop_category_id: int | None = Form(),
+                             work_time: str | None = Form(default="CLOSE"),
+                             photo: UploadFile | None = File(),
+                             ):
+    user = await User.get(operator_id)
+    if not photo.content_type.startswith("image/"):
+        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+    if user:
+        update_data = {k: v for k, v in
+                       {"name": name, "owner_id": owner_id, "shop_category_id": shop_category_id, "photo": photo} if
+                       v is not None}
+        if user.status.value in ['moderator', "admin"]:
+            shop = await Shop.get(shop_id)
+            if shop:
+                await Shop.update(shop_id, **update_data)
+                return {"ok": True}
+            else:
+                return Response("Bunday sho'p id yo'q", status.HTTP_404_NOT_FOUND)
+        else:
+            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 

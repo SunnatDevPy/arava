@@ -62,8 +62,8 @@ class Product(BaseModel):
     currency: Mapped[str] = mapped_column(SqlEnum(Currency), nullable=False)
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
-    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
-    owner: Mapped['User'] = relationship('User', lazy='selectin', back_populates='products')
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)
+    shop: Mapped['Shop'] = relationship('Shop', lazy='selectin', back_populates='products')
 
     photos: Mapped[list['ProductPhoto']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
 
