@@ -50,7 +50,7 @@ async def user_list():
     return users
 
 
-@user_router.get("/detail", name="Detail User")
+@user_router.get("/profile", name="Detail User")
 async def user_detail(user_id: int):
     user = await User.get(user_id)
     if user:
@@ -60,7 +60,7 @@ async def user_detail(user_id: int):
 
 
 # coin energy update
-@user_router.patch("/detail", name="Update User")
+@user_router.patch("/profile", name="Update User")
 async def user_patch_update(user_id: Optional[int],
                             first_name: Optional[str] = Form(default=None),
                             last_name: Optional[str] = Form(default=None),
