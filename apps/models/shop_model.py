@@ -8,7 +8,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
 from apps.models.database import BaseModel, db
-from apps.models import User
+from apps.models import User, Category
 
 
 class ShopCategory(BaseModel):
@@ -26,10 +26,13 @@ class Shop(BaseModel):
     shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     work_time: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
     photos: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
+    lat: Mapped[float] = mapped_column(nullable=True)
+    long: Mapped[float] = mapped_column(nullable=True)
+
     shop_category: Mapped['ShopCategory'] = relationship('ShopCategory', lazy='selectin', back_populates='shop')
     shop_photos: Mapped['ShopPhoto'] = relationship('ShopPhoto', lazy='selectin', back_populates='shop')
-    products: Mapped[list['Products']] = relationship('Product', lazy='selectin', back_populates='shop')
     owner: Mapped[list["User"]] = relationship('User', lazy='selectin', back_populates='my_shops')
+    categories: Mapped[list["Category"]] = relationship('Category', lazy='selectin', back_populates='shop')
 
 
 class ShopPhoto(BaseModel):

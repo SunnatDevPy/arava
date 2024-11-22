@@ -8,16 +8,9 @@ main_photos_router = APIRouter(prefix='/banners', tags=['Banners'])
 
 
 @main_photos_router.get(path='', name="All banner photos")
-async def list_category_shop(operator_id: int):
-    user = await User.get(operator_id)
-    if user:
-        if user.status.value in ['moderator', "admin"]:
-            photos = await MainPhoto.all()
-            return {'photos': photos}
-        else:
-            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-    else:
-        return Response("User yo'q", status.HTTP_404_NOT_FOUND)
+async def list_category_shop():
+    photos = await MainPhoto.all()
+    return {'photos': photos}
 
 
 @main_photos_router.post(path='', name="Create Banner Photo")
@@ -27,7 +20,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File()):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status.value in ['moderator', "admin"]:
-            await MainPhoto.create(photos=photo)
+            await MainPhoto.create(photo=photo)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

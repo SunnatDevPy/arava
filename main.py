@@ -14,7 +14,7 @@ from starlette.responses import FileResponse, RedirectResponse
 from apps.admin import ProductAdmin, CategoryAdmin, ProductPhotoAdmin, MainPhotoAdmin
 from apps.models import db
 from apps.routers import product_router, generate_router, user_router, auth_router, shop_category_router, \
-    main_photos_router
+    main_photos_router, category_router
 from apps.routers.shop import shop_router
 from config import conf
 
@@ -28,10 +28,11 @@ async def lifespan(app: FastAPI):
     app.include_router(user_router)
     app.include_router(auth_router)
     app.include_router(product_router)
-    app.include_router(generate_router)
+    # app.include_router(generate_router)
     app.include_router(shop_router)
     app.include_router(shop_category_router)
     app.include_router(main_photos_router)
+    app.include_router(category_router)
     await db.create_all()
     yield
 
@@ -54,23 +55,23 @@ admin.add_view(ProductPhotoAdmin)
 admin.add_view(MainPhotoAdmin)
 
 
-@app.get("/media/{full_path:path}", name='media')
-async def get_media(full_path):
-    image_path = Path(f'media/{full_path}')
-    if not image_path.is_file():
-        return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
-    return FileResponse(image_path)
-
-
-@app.exception_handler(status.HTTP_401_UNAUTHORIZED)
-def auth_exception_handler(request: Request, exc):
-    return RedirectResponse(request.url_for('login_page'))
-
+# @app.get("/media/{full_path:path}", name='media')
+# async def get_media(full_path):
+#     image_path = Path(f'media/{full_path}')
+#     if not image_path.is_file():
+#         return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
+#     return FileResponse(image_path)
+#
+#
+# @app.exception_handler(status.HTTP_401_UNAUTHORIZED)
+# def auth_exception_handler(request: Request, exc):
+#     return RedirectResponse(request.url_for('login_page'))
+#
 
 @app.get("/banner", name="Banner photos")
 async def list_photo_banner():
     list_ = []
-    image_path = os.listdir('media/banners')
+    image_path = os.listdir('media/banner')
     if not image_path:
         return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
     for i in image_path:

@@ -18,7 +18,7 @@ class MainPhoto(BaseModel):
 class User(BaseModel):
     class StatusUser(str, Enum):
         ADMIN = 'admin'
-        USER = 'client'
+        USER = 'user'
         SELLER = 'seller'
         MODERATOR = 'moderator'
 

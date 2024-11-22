@@ -75,7 +75,7 @@ async def user_patch_update(user_id: Optional[int],
                                          "contact": contact,
                                          "is_active": is_active,
                                          "long": long,
-                                         "lat": lat} if v is not None}
+                                         "lat": lat}.items() if v is not None}
         if update_data:
             await User.update(user.id, **update_data)
             return {"ok": True, "data": update_data}

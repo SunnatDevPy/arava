@@ -10,36 +10,17 @@ from apps.models import ShopCategory, User, Shop
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
 
-@shop_router.get("/photos", name="Banner photos")
-async def list_photo_banner():
-    list_ = []
-    image_path = os.listdir('media/shop')
-    if not image_path:
-        return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
-    for i in image_path:
-        file_path = 'media/shop/' + i
-        if i.endswith('png'):
-            type = 'png'
-        else:
-            type = 'jpeg'
-        list_.append(FileResponse(file_path, media_type=f"image/{type}", filename=i))
-    return {"banner": list_}
-
-
-# List Shop categoriya va Shoplar
 @shop_router.get(path='', name="Shops")
 async def list_category_shop():
     shops = await Shop.all()
     return {"shops": shops}
 
 
-# Get Shop categoriya TODO
 @shop_router.get(path='/detail', name="Get Shop")
 async def list_category_shop(shop_id: int):
-    category = await Shop.get(shop_id)
-    if category:
-        products = category.products
-        return {'shop-category': category, "products": products}
+    shop = await Shop.get(shop_id)
+    if shop:
+        return {'shop-category': shop}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -48,6 +29,8 @@ async def list_category_shop(shop_id: int):
 async def list_category_shop(operator_id: int,
                              name: str = Form(...),
                              owner_id: int = Form(...),
+                             long: float = Form(default=None),
+                             lat: float = Form(default=None),
                              shop_category_id: int = Form(...),
                              photo: UploadFile = File(...),
                              ):
@@ -57,7 +40,7 @@ async def list_category_shop(operator_id: int,
     if user:
         if user.status.value in ['moderator', "admin"]:
             await Shop.create(name=name, owner_id=owner_id, work_time='CLOSE', photos=photo,
-                              shop_category_id=shop_category_id)
+                              shop_category_id=shop_category_id, long=long, lat=lat)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -71,6 +54,8 @@ async def list_category_shop(operator_id: int,
                              shop_id: int = Form(),
                              name: str | None = Form(default=None),
                              owner_id: int | None = Form(...),
+                             long: float = Form(default=None),
+                             lat: float = Form(default=None),
                              shop_category_id: int | None = Form(),
                              work_time: str | None = Form(default="CLOSE"),
                              photo: UploadFile | None = File(),
@@ -80,7 +65,8 @@ async def list_category_shop(operator_id: int,
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         update_data = {k: v for k, v in
-                       {"name": name, "owner_id": owner_id, "shop_category_id": shop_category_id, "photo": photo} if
+                       {"name": name, "owner_id": owner_id, "shop_category_id": shop_category_id, "photo": photo,
+                        "work_time": work_time, "log": long, "lat": lat} if
                        v is not None}
         if user.status.value in ['moderator', "admin"]:
             shop = await Shop.get(shop_id)
@@ -102,16 +88,3 @@ async def list_category_shop(category_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
     except:
         return Response("O'chirishda xatolik", status.HTTP_404_NOT_FOUND)
-
-
-'''
-========================================================
-Bozorlar bilan ishlash
-'''
-
-
-@shop_router.get(path='/', name="Shops")
-async def list_():
-    shop_category = await ShopCategory.all()
-    shops = await Shop.all()
-    return {'shop_category': shop_category, "shops": Shop}

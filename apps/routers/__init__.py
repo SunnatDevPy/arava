@@ -5,4 +5,5 @@ from apps.routers.users import user_router
 from apps.routers.auth import auth_router
 from apps.routers.shop import shop_router
 from apps.routers.shop_category import shop_category_router
+from apps.routers.category import category_router
 
