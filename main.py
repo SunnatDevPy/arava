@@ -15,6 +15,8 @@ from apps.admin import ProductAdmin, CategoryAdmin, ProductPhotoAdmin, MainPhoto
 from apps.models import db, ShopPhoto
 from apps.routers import product_router, generate_router, user_router, auth_router, shop_category_router, \
     main_photos_router, category_router
+from apps.routers.cart import cart_router
+from apps.routers.orders import order_router
 from apps.routers.shop import shop_router
 from config import conf
 
@@ -32,7 +34,9 @@ async def lifespan(app: FastAPI):
     app.include_router(shop_router)
     app.include_router(shop_category_router)
     app.include_router(main_photos_router)
+    app.include_router(order_router)
     app.include_router(category_router)
+    app.include_router(cart_router)
     await db.create_all()
     yield
 
