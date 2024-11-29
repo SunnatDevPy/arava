@@ -39,3 +39,12 @@ class ShopPhoto(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
     shop: Mapped['Shop'] = relationship('Shop', lazy='selectin', back_populates='shop_photos')
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
+
+    @classmethod
+    async def get_shop_photos(cls, id_):
+        query = select(cls).select_from(ShopPhoto).filter(cls.shop_id == id_)
+        return (await db.execute(query)).scalars()
+
+
+# class Languages(BaseModel):
+#    name: Mapped[str] =

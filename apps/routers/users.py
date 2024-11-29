@@ -59,15 +59,14 @@ async def user_detail(user_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-# coin energy update
 @user_router.patch("/profile", name="Update User")
 async def user_patch_update(user_id: Optional[int],
-                            first_name: Optional[str] = Form(default=None),
-                            last_name: Optional[str] = Form(default=None),
-                            contact: Optional[str] = Form(default=None),
-                            is_active: Optional[bool] = Form(default=None),
-                            long: Optional[float] = Form(default=None),
-                            lat: Optional[float] = Form(default=None)):
+                            first_name: Optional[str] = Form(None),
+                            last_name: Optional[str] = Form(None),
+                            contact: Optional[str] = Form(None),
+                            is_active: Optional[bool] = Form(None),
+                            long: Optional[float] = Form(None),
+                            lat: Optional[float] = Form(None)):
     user = await User.get(user_id)
     if user:
         update_data = {k: v for k, v in {"first_name": first_name,
@@ -83,6 +82,35 @@ async def user_patch_update(user_id: Optional[int],
             return {"ok": False, "message": "Nothing to update"}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
+
+
+# @user_router.patch("/profile", name="Update User")
+# async def user_patch_update(
+#         user_id: int = Form(),
+#         first_name: Optional[str] = Form(None),
+#         last_name: Optional[str] = Form(None),
+#         contact: Optional[str] = Form(None),
+#         is_active: Optional[bool] = Form(None),
+#         long: Optional[float] = Form(None),
+#         lat: Optional[float] = Form(None),
+# ):
+#     def clean_empty_strings(value):
+#         return value if value != "" else None
+#
+#     update_data = {
+#         "first_name": clean_empty_strings(first_name),
+#         "last_name": clean_empty_strings(last_name),
+#         "contact": clean_empty_strings(contact),
+#         "is_active": is_active,
+#         "long": long,
+#         "lat": lat,
+#     }
+#     update_data = {k: v for k, v in update_data.items() if v is not None}
+#     if update_data:
+#         await User.update(user_id, **update_data)
+#         return {"ok": True, "data": update_data}
+#     else:
+#         return {"ok": False, "message": "Nothing to update"}
 
 
 @user_router.patch("/status", name="Update Status")

@@ -63,10 +63,12 @@ class Product(BaseModel):
     description: Mapped[str] = mapped_column(String(255), nullable=True)
     discount_price: Mapped[int] = mapped_column(Integer, nullable=True)
     price: Mapped[int] = mapped_column(Integer)
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
 
     photos: Mapped[list['ProductPhoto']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
+    owner: Mapped[list['User']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
 
     __table_args__ = (
         CheckConstraint('price > discount_price'),

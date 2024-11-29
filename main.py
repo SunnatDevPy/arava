@@ -12,7 +12,7 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, RedirectResponse
 
 from apps.admin import ProductAdmin, CategoryAdmin, ProductPhotoAdmin, MainPhotoAdmin
-from apps.models import db
+from apps.models import db, ShopPhoto
 from apps.routers import product_router, generate_router, user_router, auth_router, shop_category_router, \
     main_photos_router, category_router
 from apps.routers.shop import shop_router
@@ -82,3 +82,8 @@ async def list_photo_banner():
             type = 'jpeg'
         list_.append(FileResponse(file_path, media_type=f"image/{type}", filename=i))
     return {"banner": list_}
+
+
+@app.get(path='/photo-all/', name="Get Shop Photos all")
+async def list_category_shop():
+    return {'shop-photos': await ShopPhoto.all()}

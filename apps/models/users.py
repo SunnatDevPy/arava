@@ -21,6 +21,7 @@ class User(BaseModel):
         USER = 'user'
         SELLER = 'seller'
         MODERATOR = 'moderator'
+        COURIER = 'courier'
 
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)
