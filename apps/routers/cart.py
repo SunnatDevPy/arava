@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, UploadFile, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from apps.models import User, Shop, ShopPhoto, Cart
+from apps.models import User, Shop, ShopPhoto, Cart, Product
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 
@@ -30,30 +30,19 @@ async def list_category_shop(user_id: int):
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
-#
-# @shop_router.post(path='', name="Create Shop")
-# async def list_category_shop(operator_id: int,
-#                              owner_id: int = Form(...),
-#                              name: str = Form(),
-#                              long: float = Form(default=None),
-#                              lat: float = Form(default=None),
-#                              shop_category_id: int = Form(),
-#                              photo: UploadFile = File(default=None),
-#                              ):
-#     user = await User.get(operator_id)
-#     if not photo.content_type.startswith("image/"):
-#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-#     if user:
-#         if user.status.value in ['moderator', "admin"]:
-#             await Shop.create(name=name, owner_id=owner_id, work_time='CLOSE', photos=photo,
-#                               shop_category_id=shop_category_id, long=long, lat=lat)
-#             return {"ok": True}
-#         else:
-#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-#     else:
-#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-#
-#
+
+@cart_router.post(path='', name="Create Cart from User")
+async def list_category_shop(client_id: int,
+                             product_id: int = Form(),
+                             count: int = Form()):
+    user = await User.get(client_id)
+    product = await Product.get(product_id)
+    if user and product_id:
+        await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=product.category.shop_id)
+        return {"ok": True}
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
 # # Update Shop
 # @shop_router.patch(path='', name="Update Shop")
 # async def list_category_shop(operator_id: int,

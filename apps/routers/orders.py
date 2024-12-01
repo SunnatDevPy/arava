@@ -2,7 +2,7 @@ from fastapi import APIRouter, File, UploadFile, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from apps.models import User, Shop, ShopPhoto, Cart, Order
+from apps.models import User, Shop, ShopPhoto, Cart, Order, OrderItem
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
@@ -31,29 +31,21 @@ async def list_category_shop(user_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-# @shop_router.post(path='', name="Create Shop")
-# async def list_category_shop(operator_id: int,
-#                              owner_id: int = Form(...),
-#                              name: str = Form(),
-#                              long: float = Form(default=None),
-#                              lat: float = Form(default=None),
-#                              shop_category_id: int = Form(),
-#                              photo: UploadFile = File(default=None),
-#                              ):
-#     user = await User.get(operator_id)
-#     if not photo.content_type.startswith("image/"):
-#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-#     if user:
-#         if user.status.value in ['moderator', "admin"]:
-#             await Shop.create(name=name, owner_id=owner_id, work_time='CLOSE', photos=photo,
-#                               shop_category_id=shop_category_id, long=long, lat=lat)
-#             return {"ok": True}
-#         else:
-#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-#     else:
-#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-#
-#
+@order_router.post(path='', name="Create Order from User")
+async def list_category_shop(client_id: int,
+                             shop_id: int):
+    user = await User.get(client_id)
+    shop = await Shop.get(shop_id)
+    if user:
+        carts = await User.carts
+        await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id)
+        order = await Order.from_user(user.id)
+        for i in carts:
+            await OrderItem.create()
+        return {"ok": True}
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
 # # Update Shop
 # @shop_router.patch(path='', name="Update Shop")
 # async def list_category_shop(operator_id: int,

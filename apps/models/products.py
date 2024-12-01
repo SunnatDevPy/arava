@@ -68,7 +68,8 @@ class Product(BaseModel):
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
 
     photos: Mapped[list['ProductPhoto']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
-    owner: Mapped[list['User']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
+    # owner: Mapped[list['User']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
+    cart: Mapped[list['Cart']] = relationship("Cart", lazy="selectin", back_populates='product')
 
     __table_args__ = (
         CheckConstraint('price > discount_price'),

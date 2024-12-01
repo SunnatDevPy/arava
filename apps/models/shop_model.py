@@ -28,6 +28,7 @@ class Shop(BaseModel):
     photos: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
+    group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
 
     shop_category: Mapped['ShopCategory'] = relationship('ShopCategory', lazy='selectin', back_populates='shop')
     shop_photos: Mapped['ShopPhoto'] = relationship('ShopPhoto', lazy='selectin', back_populates='shop')
@@ -44,7 +45,6 @@ class ShopPhoto(BaseModel):
     async def get_shop_photos(cls, id_):
         query = select(cls).select_from(ShopPhoto).filter(cls.shop_id == id_)
         return (await db.execute(query)).scalars()
-
 
 # class Languages(BaseModel):
 #    name: Mapped[str] =

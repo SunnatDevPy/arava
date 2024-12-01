@@ -2,7 +2,7 @@ from _ctypes_test import func
 from datetime import datetime
 
 from faker import Faker
-from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func
+from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.future import select
@@ -37,7 +37,7 @@ class AsyncDatabaseSession:
 
     def init(self):
         self._engine = create_async_engine(conf.db.db_url)
-        self._session = sessionmaker(self._engine, class_=AsyncSession)()
+        self._session = sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession)()
 
     async def create_all(self):
         async with self._engine.begin() as conn:
@@ -89,10 +89,10 @@ class AbstractClass:
 
     @classmethod
     async def from_user(cls, _id, *, relationship=None):
-        query = select(cls).where(cls.user_id == _id)
-        if relationship: 
+        query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
+        if relationship:
             query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalar()
+        return (await db.execute(query)).scalars()
 
     @classmethod
     async def count(cls):

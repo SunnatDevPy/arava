@@ -2,6 +2,7 @@ from sqlalchemy import select, or_
 from starlette.requests import Request
 
 from apps.models import Product, Category
+from apps.models.products import ProductPhoto
 from config import templates
 
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException
@@ -59,20 +60,19 @@ async def list_category_shop(shop_id: int):
 
 @product_router.post(path='', name="Create Prdocut from Category")
 async def list_category_shop(operator_id: int,
-                             owner_id: int = Form(...),
-                             name: str = Form(),
-                             long: float = Form(default=None),
-                             lat: float = Form(default=None),
-                             shop_category_id: int = Form(),
-                             photo: UploadFile = File(default=None),
+                             category_id: int = Form(default=None),
+                             name: str = Form(default=None),
+                             price: int = Form(default=None),
+                             discount_price: int = Form(default=None),
+                             description: str = Form(default=None),
+                             photo: UploadFile = File(default=None)
                              ):
     user = await User.get(operator_id)
-    if not photo.content_type.startswith("image/"):
-        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status.value in ['moderator', "admin"]:
-            await Shop.create(name=name, owner_id=owner_id, work_time='CLOSE', photos=photo,
-                              shop_category_id=shop_category_id, long=long, lat=lat)
+            await Product.create(description=description, name=name, owner_id=operator_id,
+                                 category_id=category_id,
+                                 discount_price=discount_price, price=price)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -124,27 +124,27 @@ async def list_category_shop(operator_id: int, shop_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@product_router.get(path='/photos', name="Get Shop Photos")
-async def list_category_shop(shop_id: int):
-    shop = await Shop.get(shop_id)
-    if shop:
-        return {'shop_photos': await ShopPhoto.all()}
+@product_router.get(path='/photos', name="Get Photos Product")
+async def list_category_shop(product_id: int):
+    products = await Product.get(product_id)
+    if products:
+        return {'product_photos': products.photos}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
 @product_router.post(path='/photos', name="Create Shop Photo")
 async def list_category_shop(operator_id: int,
-                             shop_id: int = Form(),
+                             product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
     user = await User.get(operator_id)
-    shop = await Shop.get(shop_id)
+    shop = await Product.get(product_id)
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
         if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
-            await ShopPhoto.create(shop_id=shop_id, photo=photo)
+            await ProductPhoto.create(product_id=product_id, photo=photo)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

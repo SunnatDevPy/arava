@@ -56,7 +56,7 @@ async def list_category_shop(seller_id: int,
                 parent_id = parent_id
             else:
                 parent_id = None
-            await Category.create(name=name, shop_id=shop_id, parent_id=parent_id, photos=photo)
+            await Category.create(name=name, shop_id=shop_id, parent_id=parent_id, photo=photo)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

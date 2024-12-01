@@ -35,6 +35,8 @@ class User(BaseModel):
     carts: Mapped[list["Cart"]] = relationship('Cart', lazy='selectin', back_populates='cart_from_user')
     my_shops: Mapped[list["Shop"]] = relationship('Shop', lazy='selectin', back_populates='owner')
 
+    # product: Mapped[list['Product']] = relationship('Product', lazy='selectin', back_populates='owner')
+
     def __str__(self):
         return super().__str__() + f" - {self.username}"
 
@@ -42,9 +44,10 @@ class User(BaseModel):
 class Cart(BaseModel):
     user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'))
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("products.id", ondelete='CASCADE'))
+    shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     count: Mapped[float] = mapped_column(nullable=True)
     cart_from_user: Mapped[list["Cart"]] = relationship('User', back_populates='carts')
-
+    product: Mapped[list['Product']] = relationship("Product", lazy="selectin", back_populates='cart')
 
 class Order(BaseModel):
     class StatusOrder(str, Enum):
@@ -59,6 +62,7 @@ class Order(BaseModel):
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder), nullable=True)
     order_items: Mapped[list['OrderItem']] = relationship('OrderItem', lazy='selectin', back_populates='order')
     order_from_user: Mapped['User'] = relationship('User', lazy='selectin', back_populates='orders')
+    shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
 
 
 class OrderItem(BaseModel):
