@@ -95,6 +95,13 @@ class AbstractClass:
         return (await db.execute(query)).scalars()
 
     @classmethod
+    async def from_user_order(cls, _id, *, relationship=None):
+        query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
+        if relationship:
+            query = query.options(selectinload(relationship))
+        return (await db.execute(query)).scalar()
+
+    @classmethod
     async def count(cls):
         query = select(func.count()).select_from(cls)
         return (await db.execute(query)).scalar()

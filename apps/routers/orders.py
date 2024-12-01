@@ -37,12 +37,13 @@ async def list_category_shop(client_id: int,
     user = await User.get(client_id)
     shop = await Shop.get(shop_id)
     if user:
-        carts = await User.carts
+        carts: list['Cart'] = user.carts
         await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id)
-        order = await Order.from_user(user.id)
+        orders: 'Order' = await Order.from_user_order(user.id)
         for i in carts:
-            await OrderItem.create()
-        return {"ok": True}
+            await OrderItem.create(product_id=i.product_id, order_id=orders.id, count=i.count)
+            await Cart.delete(i.id)
+        return {"ok": True, "message": "Buyurtma qabul qilindi va guruxga yuborildi"}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
