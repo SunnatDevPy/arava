@@ -8,6 +8,7 @@ from aiogram.types import BotCommand
 from bot.handlers.start import start_router
 from bot.language import language_router
 from config import conf
+from dispatcher import bot
 
 
 async def on_start(bot: Bot):
@@ -26,7 +27,6 @@ async def main():
     dp.include_routers(start_router, language_router)
     dp.startup.register(on_start)
     dp.shutdown.register(on_shutdown)
-    bot = Bot(token=conf.bot.BOT_TOKEN)
     await dp.start_polling(bot)
 
 

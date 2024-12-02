@@ -30,6 +30,7 @@ async def list_category_shop(operator_id: int,
                              lat: float = Form(default=None),
                              shop_category_id: int = Form(),
                              photo: UploadFile = File(default=None),
+                             group_id: int = Form(default=None)
                              ):
     user = await User.get(operator_id)
     if not photo.content_type.startswith("image/"):
@@ -37,7 +38,7 @@ async def list_category_shop(operator_id: int,
     if user:
         if user.status.value in ['moderator', "admin"]:
             await Shop.create(name=name, owner_id=owner_id, work_time='CLOSE', photos=photo,
-                              shop_category_id=shop_category_id, long=long, lat=lat)
+                              shop_category_id=shop_category_id, long=long, lat=lat, group_id=group_id)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

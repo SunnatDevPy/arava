@@ -1,11 +1,26 @@
 from typing import Annotated, Optional
 
+from aiogram import Bot
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from fastapi import APIRouter, Depends, HTTPException, Form
 from pydantic import BaseModel
 
 from apps.models import User
+from dispatcher import bot
 
 user_router = APIRouter(prefix='/users', tags=['User'])
+
+
+async def start(lang='uz'):
+    if lang == 'uz':
+        text = "Guruxga qo'shish"
+    else:
+        text = "Добавить в группу"
+    kb = InlineKeyboardBuilder()
+    kb.row(InlineKeyboardButton(text=text, url='https://t.me/stock_security_bot?startgroup=true'))
+    kb.adjust(2)
+    return kb.as_markup()
 
 
 class UserAdd(BaseModel):
@@ -120,6 +135,10 @@ async def user_add(operator_id: int, user_id: int = Form(), status: str = Form()
         if user.status.value in ['moderator', "admin"]:
             try:
                 await User.update(user_id, status=status)
+                if status == 'SELLER':
+                    await bot.send_message(
+                        text="Assalomu aleykum siz sotuvchiga aylandingiz, Buyurtmalar kelishi uchun guruxga qo'shing",
+                        reply_markup=start())
                 return {'ok': True}
             except:
                 raise HTTPException(status_code=404, detail="Status kiritishda xatolik")
