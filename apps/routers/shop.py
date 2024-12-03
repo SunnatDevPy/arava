@@ -85,7 +85,7 @@ async def list_category_shop(operator_id: int, shop_id: int, items: Annotated[Cr
                              ):
     user = await User.get(operator_id)
     shop = await Shop.get(shop_id)
-    if not items.photo.content_type.startswith("image/"):
+    if not items.photos.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
