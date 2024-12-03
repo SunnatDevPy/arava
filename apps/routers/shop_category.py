@@ -45,7 +45,7 @@ async def list_category_shop(shop_category_id: int):
 async def list_category_shop(operator_id: int, items: Annotated[CreateShopCategory, Form()]):
     user = await User.get(operator_id)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             await ShopCategory.create(name=items.name)
             return {"ok": True}
         else:

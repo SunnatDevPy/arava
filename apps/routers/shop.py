@@ -127,7 +127,7 @@ async def list_category_shop(operator_id: int, shop_id: int,
     shop = await Shop.get(shop_id)
     if user and shop:
         update_data = {k: v for k, v in shop_data.items() if v is not None}
-        if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
+        if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
             await Shop.update(shop_id, **update_data)
             return {"ok": True}
         else:
