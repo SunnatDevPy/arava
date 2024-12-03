@@ -96,7 +96,7 @@ async def list_category_shop(operator_id: int, owner_id: int = Form(...),
     if not photos.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             await Shop.create(**shop_data)
             return {"ok": True}
         else:
