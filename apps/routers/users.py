@@ -61,7 +61,7 @@ async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
 
 
 @user_router.get('', name="List User")
-async def user_list():
+async def user_list() -> list[UserList]:
     users = await User.all()
     return users
 
