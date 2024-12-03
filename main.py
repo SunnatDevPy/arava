@@ -1,19 +1,15 @@
 import os
 from contextlib import asynccontextmanager
-from pathlib import Path
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
-from starlette import status
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.requests import Request
-from starlette.responses import FileResponse, RedirectResponse
 
 from apps.admin import ProductAdmin, CategoryAdmin, ProductPhotoAdmin, MainPhotoAdmin
-from apps.models import db, ShopPhoto
-from apps.routers import product_router, generate_router, user_router, auth_router, shop_category_router, \
+from apps.models import db
+from apps.routers import product_router, user_router, shop_category_router, \
     main_photos_router, category_router
 from apps.routers.cart import cart_router
 from apps.routers.orders import order_router
@@ -28,7 +24,6 @@ async def lifespan(app: FastAPI):
 
     app.mount("/static", StaticFiles(directory='static'), name='static')
     app.include_router(user_router)
-    app.include_router(auth_router)
     app.include_router(product_router)
     # app.include_router(generate_router)
     app.include_router(shop_router)
@@ -58,7 +53,6 @@ admin.add_view(CategoryAdmin)
 admin.add_view(ProductPhotoAdmin)
 admin.add_view(MainPhotoAdmin)
 
-
 # @app.get("/media/{full_path:path}", name='media')
 # async def get_media(full_path):
 #     image_path = Path(f'media/{full_path}')
@@ -72,22 +66,22 @@ admin.add_view(MainPhotoAdmin)
 #     return RedirectResponse(request.url_for('login_page'))
 #
 
-@app.get("/banner", name="Banner photos")
-async def list_photo_banner():
-    list_ = []
-    image_path = os.listdir('media/banner')
-    if not image_path:
-        return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
-    for i in image_path:
-        file_path = 'media/banners/' + i
-        if i.endswith('png'):
-            type = 'png'
-        else:
-            type = 'jpeg'
-        list_.append(FileResponse(file_path, media_type=f"image/{type}", filename=i))
-    return {"banner": list_}
-
-
-@app.get(path='/photo-all/', name="Get Shop Photos all")
-async def list_category_shop():
-    return {'shop-photos': await ShopPhoto.all()}
+# @app.get("/banner", name="Banner photos")
+# async def list_photo_banner():
+#     list_ = []
+#     image_path = os.listdir('media/banner')
+#     if not image_path:
+#         return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
+#     for i in image_path:
+#         file_path = 'media/banners/' + i
+#         if i.endswith('png'):
+#             type = 'png'
+#         else:
+#             type = 'jpeg'
+#         list_.append(FileResponse(file_path, media_type=f"image/{type}", filename=i))
+#     return {"banner": list_}
+#
+#
+# @app.get(path='/photo-all/', name="Get Shop Photos all")
+# async def list_category_shop():
+#     return {'shop-photos': await ShopPhoto.all()}

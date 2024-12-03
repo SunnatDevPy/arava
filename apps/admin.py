@@ -22,7 +22,7 @@ class CategoryAdmin(ModelView, model=Category):
 class ProductAdmin(ModelView, model=Product):
     # column_list = [Product.id, Product.name, Product.photo]
     column_labels = dict(id="ID", name="Nomi", price="Narxi")
-    column_formatters = {Product.price: lambda obj, a: f"${obj.price}"}
+    column_formatters = {Product.restorator_price: lambda obj, a: f"${obj.price}"}
     column_list = ['id', 'name', 'price']
     column_searchable_list = [Product.name]
     # column_details_exclude_list = ['created_at', 'updated_at']

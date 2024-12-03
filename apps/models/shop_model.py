@@ -35,6 +35,16 @@ class Shop(BaseModel):
     owner: Mapped[list["User"]] = relationship('User', lazy='selectin', back_populates='my_shops')
     categories: Mapped[list["Category"]] = relationship('Category', lazy='selectin', back_populates='shop')
 
+    @classmethod
+    async def get_shops_from_user(cls, id_):
+        query = select(cls).select_from(ShopPhoto).filter(cls.owner_id == id_)
+        return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def get_shops_in_category(cls, id_):
+        query = select(cls).select_from(Shop).filter(cls.id == id_)
+        return (await db.execute(query)).scalars()
+
 
 class ShopPhoto(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))

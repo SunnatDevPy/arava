@@ -23,12 +23,18 @@ class User(BaseModel):
         MODERATOR = 'moderator'
         COURIER = 'courier'
 
+    class TypeUser(str, Enum):
+        OPTOM = 'optom'
+        RESTORATOR = 'restorator'
+        ONE = 'one'
+
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(255))
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(SqlEnum(StatusUser), nullable=True)
+    type: Mapped[str] = mapped_column(SqlEnum(TypeUser), nullable=True)
     contact: Mapped[str] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
     orders: Mapped[list['Order']] = relationship('Order', lazy='selectin', back_populates='order_from_user')
@@ -48,6 +54,7 @@ class Cart(BaseModel):
     count: Mapped[float] = mapped_column(nullable=True)
     cart_from_user: Mapped[list["Cart"]] = relationship('User', back_populates='carts')
     product: Mapped[list['Product']] = relationship("Product", lazy="selectin", back_populates='cart')
+
 
 class Order(BaseModel):
     class StatusOrder(str, Enum):

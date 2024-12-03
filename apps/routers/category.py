@@ -1,11 +1,8 @@
-import os
-
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
 from starlette import status
-from starlette.responses import FileResponse
 
-from apps.models import ShopCategory, User, Category, Shop
+from apps.models import User, Category, Shop
 
 category_router = APIRouter(prefix='/category', tags=['Categories'])
 
@@ -19,10 +16,10 @@ async def list_category_shop():
 @category_router.get(path='', name="Categories from Shop")
 async def list_category_shop(seller_id: int, shop_id: int):
     seller = await User.get(seller_id)
-    shop = await Shop.get(shop_id)
+    shop = await Category.get_shop_categories(shop_id)
     if seller and shop:
         if shop.owner_id == seller_id or seller.status.value in ['moderator', "admin"]:
-            return {'shop': shop}
+            return {'categories': shop}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:

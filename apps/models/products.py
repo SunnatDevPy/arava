@@ -62,7 +62,9 @@ class Product(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
     description: Mapped[str] = mapped_column(String(255), nullable=True)
     discount_price: Mapped[int] = mapped_column(Integer, nullable=True)
-    price: Mapped[int] = mapped_column(Integer)
+    optom_price: Mapped[int] = mapped_column(Integer)
+    restorator_price: Mapped[int] = mapped_column(Integer)
+    one_price: Mapped[int] = mapped_column(Integer)
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
@@ -72,7 +74,7 @@ class Product(BaseModel):
     cart: Mapped[list['Cart']] = relationship("Cart", lazy="selectin", back_populates='product')
 
     __table_args__ = (
-        CheckConstraint('price > discount_price'),
+        CheckConstraint('one_price > discount_price'),
     )
 
 
@@ -80,3 +82,5 @@ class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
     product: Mapped['Product'] = relationship('Product', lazy='selectin', back_populates='photos')
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products/')))
+
+
