@@ -25,7 +25,7 @@ class Shop(BaseModel):
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     work_time: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
-    photos: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
+    photos: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')), nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
     group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)

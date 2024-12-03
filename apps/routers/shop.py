@@ -18,15 +18,17 @@ class ListShopsModel(BaseModel):
     photos: Optional[str] = None
     lat: Optional[float]
     long: Optional[float]
+    category_id: Optional[int]
     group_id: Optional[int] = None
 
 
-class CreateShopsModel(BaseModel):
+class UpdateShopsModel(BaseModel):
     owner_id: Optional[int] = None
     name: Optional[str] = None
     lat: Optional[float] = None
     long: Optional[float] = None
     group_id: Optional[int] = None
+    category_id: Optional[int] = None
 
 
 @shop_router.get(path='', name="Shops")
@@ -62,15 +64,40 @@ async def list_category_shop(shop_category_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
+class CreateShopsModel(BaseModel):
+    owner_id: int
+    name: str
+    lat: float
+    long: float
+    group_id: int
+    category_id: int
+    photos: UploadFile = File()
+
+
 @shop_router.post(path='', name="Create Shop")
-async def list_category_shop(operator_id: int, items: Annotated[CreateShopsModel, Form()], photos: UploadFile = File()):
+async def list_category_shop(operator_id: int, owner_id: int = Form(...),
+                             name: str = Form(...),
+                             lat: float = Form(...),
+                             long: float = Form(...),
+                             group_id: int = Form(None),
+                             shop_category_id: int = Form(...),
+                             photos: UploadFile = File()):
+    shop_data = {
+        "owner_id": owner_id,
+        "name": name,
+        "lat": lat,
+        "long": long,
+        "group_id": group_id,
+        "shop_category_id": shop_category_id,
+        "photos": photos,
+        "work_time": "CLOSE"
+    }
     user = await User.get(operator_id)
     if not photos.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status.value in ['moderator', "admin"]:
-            update_data = {k: v for k, v in items.dict().items() if v is not None}
-            await Shop.create(**update_data, photos=photos)
+            await Shop.create(**shop_data)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
