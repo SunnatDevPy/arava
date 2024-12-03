@@ -27,7 +27,6 @@ class CreateShopsModel(BaseModel):
     lat: Optional[float] = None
     long: Optional[float] = None
     group_id: Optional[int] = None
-    photos: UploadFile = File(default=None)
 
 
 @shop_router.get(path='', name="Shops")
@@ -64,14 +63,14 @@ async def list_category_shop(shop_category_id: int):
 
 
 @shop_router.post(path='', name="Create Shop")
-async def list_category_shop(operator_id: int, items: Annotated[CreateShopsModel, Form()]):
+async def list_category_shop(operator_id: int, items: Annotated[CreateShopsModel, Form()], photos: UploadFile = File()):
     user = await User.get(operator_id)
-    if not items.photos.content_type.startswith("image/"):
+    if not photos.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status.value in ['moderator', "admin"]:
             update_data = {k: v for k, v in items.dict().items() if v is not None}
-            await Shop.create(**update_data)
+            await Shop.create(**update_data, photos=photos)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
