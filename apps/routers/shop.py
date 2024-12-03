@@ -24,11 +24,10 @@ class ListShopsModel(BaseModel):
 class CreateShopsModel(BaseModel):
     owner_id: Optional[int] = None
     name: Optional[str] = None
-    photos: Optional[str] = None
     lat: Optional[float] = None
     long: Optional[float] = None
     group_id: Optional[int] = None
-    photo: UploadFile = File(default=None)
+    photos: UploadFile = File(default=None)
 
 
 @shop_router.get(path='', name="Shops")

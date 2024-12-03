@@ -17,6 +17,7 @@ class MainPhoto(BaseModel):
 
 class User(BaseModel):
     class StatusUser(str, Enum):
+        SUPERUSER = 'superuser'
         ADMIN = 'admin'
         USER = 'user'
         SELLER = 'seller'
