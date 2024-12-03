@@ -82,7 +82,7 @@ async def register_full_name(call: CallbackQuery, state: FSMContext):
     if confirm[0] == 'confirm':
         user_data = {'id': from_user.id, 'username': from_user.username,
                      'first_name': from_user.first_name, "last_name": from_user.last_name, "long": data.get('long'),
-                     "lat": data.get('lat'), "contact": str(data.get('contact')), 'status': "ADMIN" if from_user.id == 5649321700 else "USER" }
+                     "lat": data.get('lat'), "contact": str(data.get('contact')), 'status': "ADMIN" if from_user.id == 5649321700 else "USER", 'type': 'one'}
         await User.create(**user_data)
         if call.from_user.id in [5649321700, ]:
             await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
