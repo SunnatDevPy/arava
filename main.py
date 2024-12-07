@@ -36,6 +36,12 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# from minio import Minio
+# minioClient = Minio('127.0.0.1:9000',
+#                 access_key='xxxx',
+#                 secret_key='xxxx',
+#                 secure=False)
+
 app = FastAPI(docs_url="/docs", lifespan=lifespan)
 app.add_middleware(SessionMiddleware, secret_key=conf.SECRET_KEY)
 app.add_middleware(

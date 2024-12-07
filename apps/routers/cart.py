@@ -3,6 +3,7 @@ from fastapi import Response
 from starlette import status
 
 from apps.models import User, Shop, ShopPhoto, Cart, Product
+from apps.utils.details import get_sum_from_user
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 
@@ -18,6 +19,16 @@ async def list_category_shop(cart_id: int):
     cart = await Cart.get(cart_id)
     if cart:
         return {'cart': cart}
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
+
+@cart_router.get(path='/sum', name="Get Cart Sum User")
+async def list_category_shop(user_id: int, shop_id: int):
+    user = await User.get(user_id)
+    shop = await Shop.get(shop_id)
+    if shop and user:
+        return await get_sum_from_user(user, shop_id)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 

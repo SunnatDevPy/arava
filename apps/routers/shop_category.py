@@ -60,7 +60,7 @@ async def list_category_shop(operator_id: int, items: Annotated[UpdateShopCatego
     shop_category = await ShopCategory.get(items.shop_category_id)
     user = await User.get(operator_id)
     if user and shop_category:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             if shop_category:
                 await ShopCategory.update(items.shop_category_id, name=items.shop_category_id)
                 return {"ok": True}
@@ -75,7 +75,7 @@ async def list_category_shop(operator_id: int, category_id: int):
     user = await User.get(operator_id)
     category = await ShopCategory.get(category_id)
     if user and category:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             await ShopCategory.delete(category_id)
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
         else:

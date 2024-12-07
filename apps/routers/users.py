@@ -5,7 +5,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from fastapi import APIRouter, HTTPException, Form
 from pydantic import BaseModel
 
-from apps.models import User
+from apps.models import User, Shop
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -47,6 +47,18 @@ class UserList(BaseModel):
     lat: Optional[float] = None
 
 
+class ShopsList(BaseModel):
+    id: Optional[int] = None
+    name: Optional[str] = None
+    owner_id: Optional[int] = None
+    shop_category_id: Optional[int] = None
+    work_time: Optional[str] = None
+    photos: Optional[str] = None
+    group_id: Optional[int] = None
+    long: Optional[float] = None
+    lat: Optional[float] = None
+
+
 @user_router.post("", name="Create User")
 async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
     user = await User.get(operator_id)
@@ -64,6 +76,12 @@ async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
 async def user_list() -> list[UserList]:
     users = await User.all()
     return users
+
+
+@user_router.get('/my-shops', name="List User Shops")
+async def user_list(user_id: int) -> list[ShopsList]:
+    shops = await Shop.get_shops_from_user(user_id)
+    return shops
 
 
 class UserUpdate(BaseModel):

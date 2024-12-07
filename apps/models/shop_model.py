@@ -1,14 +1,13 @@
-import asyncio
 from enum import Enum
 
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import BigInteger, Enum as SqlEnum, String, VARCHAR, ForeignKey, Integer, CheckConstraint, select, func
+from sqlalchemy import BigInteger, Enum as SqlEnum, VARCHAR, ForeignKey, select, desc
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
-from apps.models.database import BaseModel, db
 from apps.models import User, Category
+from apps.models.database import BaseModel, db
 
 
 class ShopCategory(BaseModel):
@@ -25,7 +24,6 @@ class Shop(BaseModel):
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     work_time: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
-    photos: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')), nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
     group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
@@ -37,12 +35,12 @@ class Shop(BaseModel):
 
     @classmethod
     async def get_shops_from_user(cls, id_):
-        query = select(cls).select_from(ShopPhoto).filter(cls.owner_id == id_)
+        query = select(cls).order_by(desc(cls.id)).filter(cls.owner_id == id_)
         return (await db.execute(query)).scalars()
 
     @classmethod
     async def get_shops_in_category(cls, id_):
-        query = select(cls).select_from(Shop).filter(cls.id == id_)
+        query = select(cls).select_from(Shop).filter(cls.id == id_).order_by(desc(cls.id))
         return (await db.execute(query)).scalars()
 
 
@@ -53,8 +51,6 @@ class ShopPhoto(BaseModel):
 
     @classmethod
     async def get_shop_photos(cls, id_):
-        query = select(cls).select_from(ShopPhoto).filter(cls.shop_id == id_)
+        query = select(cls).select_from(ShopPhoto).filter(cls.shop_id == id_).order_by(desc(cls.id))
         return (await db.execute(query)).scalars()
 
-# class Languages(BaseModel):
-#    name: Mapped[str] =

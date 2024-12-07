@@ -28,7 +28,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File()):
         return Response("User yo'q", status.HTTP_404_NOT_FOUND)
 
 
-@main_photos_router.patch(path='/shop-category', name="Update Banner photo")
+@main_photos_router.patch(path='/update', name="Update Banner photo")
 async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo_id: int = Form()):
     user = await User.get(operator_id)
     if not photo.content_type.startswith("image/"):

@@ -1,5 +1,8 @@
+from typing import Optional
+
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
+from pydantic import BaseModel
 from starlette import status
 
 from apps.models import User, Category, Shop
@@ -7,19 +10,26 @@ from apps.models import User, Category, Shop
 category_router = APIRouter(prefix='/category', tags=['Categories'])
 
 
+class ListCategories(BaseModel):
+    id: int
+    shop_id: int
+    parent_id: Optional[int] = None
+    photo: Optional[str] = None
+
+
 @category_router.get(path='', name="Categories")
-async def list_category_shop():
+async def list_category_shop() -> list[ListCategories]:
     categories = await Category.all()
-    return {"categories": categories}
+    return categories
 
 
-@category_router.get(path='', name="Categories from Shop")
+@category_router.get(path='', name="List from Shop")
 async def list_category_shop(seller_id: int, shop_id: int):
     seller = await User.get(seller_id)
     shop = await Category.get_shop_categories(shop_id)
     if seller and shop:
-        if shop.owner_id == seller_id or seller.status.value in ['moderator', "admin"]:
-            return {'categories': shop}
+        if shop.owner_id == seller_id or seller.status.value in ['moderator', "admin", "superuser"]:
+            return shop
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
@@ -48,11 +58,7 @@ async def list_category_shop(seller_id: int,
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if seller and shop:
-        if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin"]:
-            if parent_id:
-                parent_id = parent_id
-            else:
-                parent_id = None
+        if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin", "superuser"]:
             await Category.create(name=name, shop_id=shop_id, parent_id=parent_id, photo=photo)
             return {"ok": True}
         else:
@@ -76,7 +82,7 @@ async def list_category_shop(operator_id: int,
         update_data = {k: v for k, v in
                        {"name": name, "parent_id": parent_id, "photo": photo} if
                        v is not None}
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             shop = await Category.get(category_id)
             if shop:
                 await Category.update(category_id, **update_data)
@@ -93,7 +99,7 @@ async def list_category_shop(operator_id: int,
 async def list_category_shop(category_id: int, operator_id: int):
     user = await User.get(operator_id)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             category = await Category.get(category_id)
             if category:
                 await Category.delete(category_id)

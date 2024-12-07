@@ -2,7 +2,7 @@ from enum import Enum
 
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import Boolean
+from sqlalchemy import Boolean, desc, select, func
 from sqlalchemy import ForeignKey, BIGINT, BOOLEAN, Enum as SqlEnum
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped, relationship
