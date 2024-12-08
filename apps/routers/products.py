@@ -70,7 +70,7 @@ async def list_category_shop(operator_id: int,
                              ):
     user = await User.get(operator_id)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             await Product.create(description=description, name=name, owner_id=operator_id,
                                  category_id=category_id,
                                  discount_price=discount_price, restorator_price=restorator_price,
@@ -91,7 +91,7 @@ async def list_category_shop(operator_id: int,
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
-        if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
+        if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
             await ProductPhoto.create(product_id=product_id, photo=photo)
             return {"ok": True}
         else:
