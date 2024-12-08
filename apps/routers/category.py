@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any, Union
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
@@ -23,8 +23,9 @@ async def list_category_shop() -> list[ListCategories]:
     return categories
 
 
+
 @category_router.get(path='/from-shop', name="List from Shop")
-async def list_category_shop(seller_id: int, shop_id: int):
+async def list_category_shop(seller_id: int, shop_id: int) -> Union[list[ListCategories], Any]:
     seller = await User.get(seller_id)
     shop = await Shop.get(shop_id)
     if seller and shop:
