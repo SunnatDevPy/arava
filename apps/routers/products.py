@@ -71,15 +71,16 @@ async def list_category_shop(operator_id: int,
     user = await User.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            await Product.create(description=description, name=name, owner_id=operator_id,
-                                 category_id=category_id,
-                                 discount_price=discount_price, restorator_price=restorator_price,
-                                 optom_price=optom_price, one_price=one_price)
-            return {"ok": True}
+            product = await Product.create(description=description, name=name, owner_id=operator_id,
+                                           category_id=category_id,
+                                           discount_price=discount_price, restorator_price=restorator_price,
+                                           optom_price=optom_price, one_price=one_price)
+            return {"ok": True, "product": product}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
 
 @product_router.post(path='/photos', name="Create Product Photo")
 async def list_category_shop(operator_id: int,
