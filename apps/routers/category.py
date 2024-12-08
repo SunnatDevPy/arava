@@ -26,7 +26,7 @@ async def list_category_shop() -> list[ListCategories]:
 @category_router.get(path='/from-shop', name="List from Shop")
 async def list_category_shop(seller_id: int, shop_id: int):
     seller = await User.get(seller_id)
-    shop = await Category.get_shop_categories(shop_id)
+    shop = await Shop.get(shop_id)
     if seller and shop:
         if shop.owner_id == seller_id or seller.status.value in ['moderator', "admin", "superuser"]:
             return shop
