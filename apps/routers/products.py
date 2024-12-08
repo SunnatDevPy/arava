@@ -62,7 +62,9 @@ async def list_category_shop(shop_id: int):
 async def list_category_shop(operator_id: int,
                              category_id: int = Form(default=None),
                              name: str = Form(default=None),
-                             price: int = Form(default=None),
+                             optom_price: int = Form(default=None),
+                             restorator_price: int = Form(default=None),
+                             one_price: int = Form(default=None),
                              discount_price: int = Form(default=None),
                              description: str = Form(default=None),
                              ):
@@ -71,67 +73,15 @@ async def list_category_shop(operator_id: int,
         if user.status.value in ['moderator', "admin"]:
             await Product.create(description=description, name=name, owner_id=operator_id,
                                  category_id=category_id,
-                                 discount_price=discount_price, price=price)
+                                 discount_price=discount_price, restorator_price=restorator_price,
+                                 optom_price=optom_price, one_price=one_price)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
-
-# Update Shop
-@product_router.patch(path='', name="Update Shop")
-async def list_category_shop(operator_id: int,
-                             shop_id: int = Form(),
-                             name: str = Form(default=None),
-                             long: float = Form(default=None),
-                             lat: float = Form(default=None),
-                             shop_category_id: int = Form(default=None),
-                             work_time: str = Form(default="CLOSE"),
-                             ):
-    user = await User.get(operator_id)
-    shop = await Shop.get(shop_id)
-    if not photo.content_type.startswith("image/"):
-        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-    if user and shop:
-        update_data = {k: v for k, v in
-                       {"name": name, "shop_category_id": shop_category_id, "photo": photo,
-                        "work_time": work_time, "log": long, "lat": lat}.items() if
-                       v is not None}
-
-        if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
-            await Shop.update(shop_id, **update_data)
-            return {"ok": True}
-        else:
-            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-@product_router.delete(path='', name="Delete Shop")
-async def list_category_shop(operator_id: int, shop_id: int):
-    user = await User.get(operator_id)
-    shop = await Shop.get(shop_id)
-    if user and shop:
-        if user.status.value in ['moderator', "admin"]:
-            await Shop.delete(shop)
-            return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-        else:
-            return Response("Userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-@product_router.get(path='/photos', name="Get Photos Product")
-async def list_category_shop(product_id: int):
-    products = await Product.get(product_id)
-    if products:
-        return {'product_photos': products.photos}
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-@product_router.post(path='/photos', name="Create Shop Photo")
+@product_router.post(path='/photos', name="Create Product Photo")
 async def list_category_shop(operator_id: int,
                              product_id: int = Form(),
                              photo: UploadFile = File(default=None),
@@ -149,38 +99,108 @@ async def list_category_shop(operator_id: int,
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
-
-@product_router.patch(path='/photos', name="Update Shop Photo")
-async def list_category_shop(operator_id: int,
-                             shop_id: int = Form(),
-                             shop_photo_id: int = Form(),
-                             photo: UploadFile = File(default=None),
-                             ):
-    user = await User.get(operator_id)
-    shop = await ShopPhoto.get(shop_id)
-    if not photo.content_type.startswith("image/"):
-        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-    if user and shop:
-        update_data = {k: v for k, v in
-                       {"photo": photo}.items() if
-                       v is not None}
-        if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
-            await ShopPhoto.update(shop_photo_id, **update_data)
-            return {"ok": True}
-        else:
-            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-@product_router.delete("/photos")
-async def user_delete(operator_id: int, shop_photo_id):
-    user = await User.get(operator_id)
-    if user:
-        if user.status.value in ['moderator', "admin"]:
-            await ShopPhoto.delete(shop_photo_id)
-            return {"ok": True, 'id': shop_photo_id}
-        else:
-            raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+# # Update Shop
+# @product_router.patch(path='', name="Update Shop")
+# async def list_category_shop(operator_id: int,
+#                              shop_id: int = Form(),
+#                              name: str = Form(default=None),
+#                              long: float = Form(default=None),
+#                              lat: float = Form(default=None),
+#                              shop_category_id: int = Form(default=None),
+#                              work_time: str = Form(default="CLOSE"),
+#                              ):
+#     user = await User.get(operator_id)
+#     shop = await Shop.get(shop_id)
+#     if not photo.content_type.startswith("image/"):
+#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+#     if user and shop:
+#         update_data = {k: v for k, v in
+#                        {"name": name, "shop_category_id": shop_category_id, "photo": photo,
+#                         "work_time": work_time, "log": long, "lat": lat}.items() if
+#                        v is not None}
+#
+#         if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
+#             await Shop.update(shop_id, **update_data)
+#             return {"ok": True}
+#         else:
+#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+#     else:
+#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+#
+#
+# @product_router.delete(path='', name="Delete Shop")
+# async def list_category_shop(operator_id: int, shop_id: int):
+#     user = await User.get(operator_id)
+#     shop = await Shop.get(shop_id)
+#     if user and shop:
+#         if user.status.value in ['moderator', "admin"]:
+#             await Shop.delete(shop)
+#             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+#         else:
+#             return Response("Userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+#     else:
+#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+#
+#
+# @product_router.get(path='/photos', name="Get Photos Product")
+# async def list_category_shop(product_id: int):
+#     products = await Product.get(product_id)
+#     if products:
+#         return {'product_photos': products.photos}
+#     else:
+#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+#
+#
+# @product_router.post(path='/photos', name="Create Shop Photo")
+# async def list_category_shop(operator_id: int,
+#                              product_id: int = Form(),
+#                              photo: UploadFile = File(default=None),
+#                              ):
+#     user = await User.get(operator_id)
+#     shop = await Product.get(product_id)
+#     if not photo.content_type.startswith("image/"):
+#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+#     if user and shop:
+#         if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
+#             await ProductPhoto.create(product_id=product_id, photo=photo)
+#             return {"ok": True}
+#         else:
+#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+#     else:
+#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+#
+#
+# @product_router.patch(path='/photos', name="Update Shop Photo")
+# async def list_category_shop(operator_id: int,
+#                              shop_id: int = Form(),
+#                              shop_photo_id: int = Form(),
+#                              photo: UploadFile = File(default=None),
+#                              ):
+#     user = await User.get(operator_id)
+#     shop = await ShopPhoto.get(shop_id)
+#     if not photo.content_type.startswith("image/"):
+#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+#     if user and shop:
+#         update_data = {k: v for k, v in
+#                        {"photo": photo}.items() if
+#                        v is not None}
+#         if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
+#             await ShopPhoto.update(shop_photo_id, **update_data)
+#             return {"ok": True}
+#         else:
+#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+#     else:
+#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+#
+#
+# @product_router.delete("/photos")
+# async def user_delete(operator_id: int, shop_photo_id):
+#     user = await User.get(operator_id)
+#     if user:
+#         if user.status.value in ['moderator', "admin"]:
+#             await ShopPhoto.delete(shop_photo_id)
+#             return {"ok": True, 'id': shop_photo_id}
+#         else:
+#             raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
+#     else:
+#         raise HTTPException(status_code=404, detail="Item not found")
