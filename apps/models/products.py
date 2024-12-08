@@ -62,6 +62,7 @@ class Product(BaseModel):
     one_price: Mapped[int] = mapped_column(Integer)
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
+    photos: Mapped['ProductPhoto'] = relationship("ProductPhoto", lazy="selectin", back_populates='product')
 
     __table_args__ = (
         CheckConstraint('one_price > discount_price'),
@@ -76,3 +77,4 @@ class Product(BaseModel):
 class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products/')))
+    product: Mapped['Product'] = relationship("Product", lazy="selectin", back_populates='photos')
