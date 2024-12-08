@@ -38,11 +38,6 @@ class User(BaseModel):
     type: Mapped[str] = mapped_column(SqlEnum(TypeUser), nullable=True)
     contact: Mapped[str] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
-    orders: Mapped[list['Order']] = relationship('Order', lazy='selectin', back_populates='order_from_user')
-    carts: Mapped[list["Cart"]] = relationship('Cart', lazy='selectin', back_populates='cart_from_user')
-    my_shops: Mapped[list["Shop"]] = relationship('Shop', lazy='selectin', back_populates='owner')
-
-    # product: Mapped[list['Product']] = relationship('Product', lazy='selectin', back_populates='owner')
 
     def __str__(self):
         return super().__str__() + f" - {self.username}"
@@ -53,8 +48,6 @@ class Cart(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("products.id", ondelete='CASCADE'))
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     count: Mapped[float] = mapped_column(nullable=True)
-    cart_from_user: Mapped[list["Cart"]] = relationship('User', back_populates='carts')
-    product: Mapped[list['Product']] = relationship("Product", lazy="selectin", back_populates='cart')
 
 
 class Order(BaseModel):
@@ -68,8 +61,6 @@ class Order(BaseModel):
     user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('users.id', ondelete='CASCADE'))
     payment: Mapped[bool] = mapped_column(BOOLEAN, default=False)
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder), nullable=True)
-    order_items: Mapped[list['OrderItem']] = relationship('OrderItem', lazy='selectin', back_populates='order')
-    order_from_user: Mapped['User'] = relationship('User', lazy='selectin', back_populates='orders')
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
 
 
@@ -77,4 +68,3 @@ class OrderItem(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("products.id", ondelete='CASCADE'))
     order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(Order.id, ondelete='CASCADE'))
     count: Mapped[float] = mapped_column(default=1, nullable=True)
-    order: Mapped['Order'] = relationship('Order', lazy='selectin', back_populates='order_items')

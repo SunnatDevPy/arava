@@ -12,7 +12,6 @@ from apps.models.database import BaseModel, db
 
 class ShopCategory(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
-    shop: Mapped[list['Shop']] = relationship('Shop', lazy='selectin', back_populates='shop_category')
 
 
 class Shop(BaseModel):
@@ -28,10 +27,6 @@ class Shop(BaseModel):
     long: Mapped[float] = mapped_column(nullable=True)
     group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
 
-    shop_category: Mapped['ShopCategory'] = relationship('ShopCategory', lazy='selectin', back_populates='shop')
-    shop_photos: Mapped['ShopPhoto'] = relationship('ShopPhoto', lazy='selectin', back_populates='shop')
-    owner: Mapped[list["User"]] = relationship('User', lazy='selectin', back_populates='my_shops')
-    categories: Mapped[list["Category"]] = relationship('Category', lazy='selectin', back_populates='shop')
 
     @classmethod
     async def get_shops_from_user(cls, id_):
@@ -46,7 +41,6 @@ class Shop(BaseModel):
 
 class ShopPhoto(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
-    shop: Mapped['Shop'] = relationship('Shop', lazy='selectin', back_populates='shop_photos')
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop/')))
 
     @classmethod

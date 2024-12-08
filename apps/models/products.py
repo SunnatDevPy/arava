@@ -16,11 +16,6 @@ class Category(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)
     parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('categories.id', ondelete='CASCADE'), nullable=True)
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/category/')))
-    parent: Mapped['Category'] = relationship('Category', lazy='selectin', remote_side='Category.id',
-                                              back_populates='subcategories')
-    products: Mapped[list['Product']] = relationship('Product', lazy='selectin', back_populates='category')
-    subcategories: Mapped[list['Category']] = relationship('Category', lazy='selectin', back_populates='parent')
-    shop: Mapped[list["Shop"]] = relationship('Shop', lazy='selectin', back_populates='categories')
 
     def __str__(self):
         if self.parent is None:
@@ -67,11 +62,7 @@ class Product(BaseModel):
     one_price: Mapped[int] = mapped_column(Integer)
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
-    category: Mapped['Category'] = relationship('Category', lazy='selectin', back_populates='products')
 
-    photos: Mapped[list['ProductPhoto']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
-    # owner: Mapped[list['User']] = relationship('ProductPhoto', lazy='selectin', back_populates='product')
-    cart: Mapped[list['Cart']] = relationship("Cart", lazy="selectin", back_populates='product')
 
     __table_args__ = (
         CheckConstraint('one_price > discount_price'),
@@ -80,7 +71,6 @@ class Product(BaseModel):
 
 class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
-    product: Mapped['Product'] = relationship('Product', lazy='selectin', back_populates='photos')
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products/')))
 
 
