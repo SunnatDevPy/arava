@@ -67,11 +67,10 @@ async def list_category_shop(shop_category_id: int):
 class CreateShopsModel(BaseModel):
     owner_id: int
     name: str
-    work_time: str
     lat: float
     long: float
     group_id: Optional[int] = None
-    category_id: int
+    shop_category_id: int
 
 
 @shop_router.post(path='', name="Create Shop")
@@ -79,7 +78,7 @@ async def list_category_shop(operator_id: int, items: Annotated[CreateShopsModel
     user = await User.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            await Shop.create(**items.dict())
+            await Shop.create(**items.dict(), work_time='CLOSE')
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
