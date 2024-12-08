@@ -21,26 +21,26 @@ product_router = APIRouter(prefix='/products', tags=['Product'])
 #     return RedirectResponse('/products')
 
 
-@product_router.get("/", name='product_list')
-async def get_all_products(request: Request, category: int = None, search: str = None):
-    if category:
-        subquery = select(Category.id).where(or_(Category.parent_id == category, Category.id == category))
-        products = await Product.filter(Product.category_id.in_(subquery))
-    else:
-        products = await Product.all()
-
-    # products = await Product.filter(Product.category_id.in_([1, 2]), columns=(Product, (Product.price * sum_price).label('price_sum')))
-
-    # if search:
-    #     products = await products.filter(or_(Product.name.ilike(f'%{search}%'), Product.description.ilike(f'%{search}%')))
-
-    categories = await Category.filter(Category.parent_id == None, relationship=Category.subcategories)
-
-    context = {
-        'products': products,
-        'categories': categories
-    }
-    return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
+# @product_router.get("/", name='product_list')
+# async def get_all_products(request: Request, category: int = None, search: str = None):
+#     if category:
+#         subquery = select(Category.id).where(or_(Category.parent_id == category, Category.id == category))
+#         products = await Product.filter(Product.category_id.in_(subquery))
+#     else:
+#         products = await Product.all()
+#
+#     # products = await Product.filter(Product.category_id.in_([1, 2]), columns=(Product, (Product.price * sum_price).label('price_sum')))
+#
+#     # if search:
+#     #     products = await products.filter(or_(Product.name.ilike(f'%{search}%'), Product.description.ilike(f'%{search}%')))
+#
+#     categories = await Category.filter(Category.parent_id == None, relationship=Category.subcategories)
+#
+#     context = {
+#         'products': products,
+#         'categories': categories
+#     }
+#     return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
 
 
 @product_router.get(path='', name="Get All Products")
@@ -65,7 +65,6 @@ async def list_category_shop(operator_id: int,
                              price: int = Form(default=None),
                              discount_price: int = Form(default=None),
                              description: str = Form(default=None),
-                             photo: UploadFile = File(default=None)
                              ):
     user = await User.get(operator_id)
     if user:
@@ -89,7 +88,6 @@ async def list_category_shop(operator_id: int,
                              lat: float = Form(default=None),
                              shop_category_id: int = Form(default=None),
                              work_time: str = Form(default="CLOSE"),
-                             photo: UploadFile = File(default=None),
                              ):
     user = await User.get(operator_id)
     shop = await Shop.get(shop_id)

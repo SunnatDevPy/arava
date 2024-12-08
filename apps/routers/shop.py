@@ -70,15 +70,13 @@ class CreateShopsModel(BaseModel):
     work_time: str
     lat: float
     long: float
-    group_id: int
+    group_id: Optional[int] = None
     category_id: int
 
 
 @shop_router.post(path='', name="Create Shop")
 async def list_category_shop(operator_id: int, items: Annotated[CreateShopsModel, Form()]):
     user = await User.get(operator_id)
-    if not items.photos.content_type.startswith("image/"):
-        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
             await Shop.create(**items.dict())

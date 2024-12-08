@@ -19,7 +19,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File()):
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             await MainPhoto.create(photo=photo)
             return {"ok": True}
         else:
@@ -34,7 +34,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             if await MainPhoto.get(photo_id):
                 await MainPhoto.update(photo_id, photos=photo)
                 return {"ok": True}
@@ -50,7 +50,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo
 async def list_category_shop(operator_id: int, photo_id: int = Form()):
     user = await User.get(operator_id)
     if user:
-        if user.status.value in ['moderator', "admin"]:
+        if user.status.value in ['moderator', "admin", "superuser"]:
             if await MainPhoto.get(photo_id):
                 await MainPhoto.delete(photo_id)
                 return {"ok": True}
