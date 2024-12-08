@@ -18,9 +18,9 @@ class Category(BaseModel):
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/category/')))
 
     def __str__(self):
-        if self.parent is None:
+        if self.parent_id is None:
             return self.name
-        return f"{self.parent} -> {self.name}"
+        return f"{self.parent_id} -> {self.name}"
 
     @classmethod
     async def generate(cls, count: int = 1):
@@ -36,8 +36,8 @@ class Category(BaseModel):
 
     @classmethod
     async def get_shop_categories(cls, id_):
-        query = select(cls).select_from(Category).filter(cls.shop_id == id_)
-        return (await db.execute(query)).scalars()
+        query = select(cls).filter(cls.shop_id == id_)
+        return (await db.execute(query)).scalars().all()
 
     @property
     def get_products(self):
