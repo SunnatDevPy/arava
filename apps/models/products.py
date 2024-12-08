@@ -63,14 +63,16 @@ class Product(BaseModel):
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
 
-
     __table_args__ = (
         CheckConstraint('one_price > discount_price'),
     )
+
+    @classmethod
+    async def get_products_category(cls, category_id):
+        query = select(cls).filter(cls.category_id == category_id)
+        return (await db.execute(query)).scalars().all()
 
 
 class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products/')))
-
-

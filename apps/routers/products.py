@@ -3,6 +3,7 @@ from starlette.requests import Request
 
 from apps.models import Product, Category
 from apps.models.products import ProductPhoto
+from apps.utils.details import get_products_utils
 from config import templates
 
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException
@@ -49,13 +50,13 @@ async def list_category_shop():
     return {"products": products}
 
 
-# @product_router.get(path='/from-shop', name="Get from Shop Products")
-# async def list_category_shop(shop_id: int):
-#     categories = await Category.get_shop_categories(shop_id)
-#     if categories:
-#         return {'categories': categories}
-#     else:
-#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+@product_router.get(path='/from-shop', name="Get from Shop Products")
+async def list_category_shop(shop_id: int):
+    categories = await get_products_utils(shop_id)
+    if categories:
+        return categories
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
 @product_router.post(path='', name="Create Prdocut from Category")

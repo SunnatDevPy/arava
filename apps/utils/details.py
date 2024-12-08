@@ -1,4 +1,4 @@
-from apps.models import Cart, Product
+from apps.models import Cart, Product, Category
 
 
 async def get_sum_from_user(shop_id, user):
@@ -13,3 +13,12 @@ async def get_sum_from_user(shop_id, user):
         elif user.type == "ONE":
             sum_ += product.one_price
     return sum_
+
+
+async def get_products_utils(shop_id):
+    categories: list['Category'] = await Category.get_shop_categories(shop_id)
+    category = []
+    for i in categories:
+        products: list['Product'] = await Product.get_products_category(i.id)
+        category.append({'category': i, "products": products})
+    return category
