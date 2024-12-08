@@ -23,7 +23,7 @@ async def list_category_shop() -> list[ListCategories]:
     return categories
 
 
-@category_router.get(path='', name="List from Shop")
+@category_router.get(path='/from-shop', name="List from Shop")
 async def list_category_shop(seller_id: int, shop_id: int):
     seller = await User.get(seller_id)
     shop = await Category.get_shop_categories(shop_id)
@@ -59,6 +59,8 @@ async def list_category_shop(seller_id: int,
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if seller and shop:
         if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin", "superuser"]:
+            if parent_id == 0:
+                parent_id = None
             await Category.create(name=name, shop_id=shop_id, parent_id=parent_id, photo=photo)
             return {"ok": True}
         else:
