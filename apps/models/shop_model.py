@@ -27,7 +27,6 @@ class Shop(BaseModel):
     long: Mapped[float] = mapped_column(nullable=True)
     group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
 
-
     @classmethod
     async def get_shops_from_user(cls, id_):
         query = select(cls).order_by(desc(cls.id)).filter(cls.owner_id == id_)
@@ -47,4 +46,3 @@ class ShopPhoto(BaseModel):
     async def get_shop_photos(cls, id_):
         query = select(cls).select_from(ShopPhoto).filter(cls.shop_id == id_).order_by(desc(cls.id))
         return (await db.execute(query)).scalars()
-
