@@ -52,9 +52,9 @@ async def list_category_shop():
 
 @product_router.get(path='/from-shop', name="Get from Shop Products")
 async def list_category_shop(shop_id: int):
-    categories = await get_products_utils(shop_id)
-    if categories:
-        return categories
+    products = await get_products_utils(shop_id)
+    if products:
+        return products
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
