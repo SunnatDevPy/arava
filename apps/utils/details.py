@@ -19,12 +19,13 @@ async def get_products_utils(shop_id):
 
 
 async def get_shops_unique_cart(carts):
-    cart = []
+    unique_ids = set()
+    unique_cart = []
+
     for i in carts:
         shop = await Shop.get(i.shop_id)
-        m = {'id': shop.id, "name": shop.name}
-        if m in carts:
-            continue
-        else:
-            cart.append(m)
-    return cart
+        if shop.id not in unique_ids:
+            unique_ids.add(shop.id)
+            unique_cart.append({'id': shop.id, 'name': shop.name})
+
+    return unique_cart

@@ -35,19 +35,18 @@ async def list_category_shop(user_id: int, shop_id: int):
 
 @cart_router.get(path='/from-user', name="Get Cart")
 async def list_category_shop(user_id: int):
-    carts = await Cart.from_user(user_id)
+    carts = await Cart.get_cart_from_user(user_id)
     if carts:
-        return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
+        return {'carts': carts}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-# , "shops": await get_shops_unique_cart(carts)
 @cart_router.get(path='/from-user-shop', name="Get Cart in Shop")
 async def list_category_shop(user_id: int, shop_id: int):
-    carts = await Cart.from_user(user_id)
+    carts = await Cart.get_cart_from_shop(user_id, shop_id)
     if carts:
-        return {'carts': Cart.get_cart_from_shop(user_id, shop_id)}
+        return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
