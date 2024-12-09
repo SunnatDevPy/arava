@@ -59,7 +59,7 @@ async def list_category_shop(operator_id: int, items: Annotated[CreateShopCatego
     user = await User.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            await ShopCategory.create(name=items.name)
+            await ShopCategory.create(name=items.name, icon_name=items.icon_name)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -74,6 +74,10 @@ async def list_category_shop(operator_id: int, items: Annotated[UpdateShopCatego
     user = await User.get(operator_id)
     if user and shop_category:
         if user.status.value in ['moderator', "admin", "superuser"]:
+            name = None
+            icon_name = None
+            if items.name:
+                pass
             if shop_category:
                 await ShopCategory.update(items.shop_category_id, name=items.shop_category_id)
                 return {"ok": True}
