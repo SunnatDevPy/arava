@@ -39,6 +39,7 @@ class User(BaseModel):
     contact: Mapped[str] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
 
+
     def __str__(self):
         return super().__str__() + f" - {self.username}"
 

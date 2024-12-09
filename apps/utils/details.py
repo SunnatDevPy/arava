@@ -1,4 +1,4 @@
-from apps.models import Cart, Product, Category
+from apps.models import Cart, Product, Category, Shop
 
 
 async def get_sum_from_user(shop_id, user):
@@ -22,3 +22,15 @@ async def get_products_utils(shop_id):
         products: list['Product'] = await Product.get_products_category(i.id)
         category.append({'category': i, "products": products})
     return category
+
+
+async def get_shops_unique_cart(carts):
+    cart = []
+    for i in carts:
+        shop = await Shop.get(i.shop_id)
+        m = {'id': shop.id, "name": shop.name}
+        if m in carts:
+            continue
+        else:
+            cart.append(m)
+    return cart
