@@ -1,7 +1,7 @@
 import minio
 from minio import Minio
 
-minioClient = Minio('backend1.mussi.uz:9000',
+minioClient = Minio('127.0.0.1:9000',
                     access_key='QuQZkQn2KfWJiuDIBsbO',
                     secret_key='2zNnTe2SIgjwuudMPMHjyDo8QeFiHHHb0nYGysWb',
                     secure=False)
