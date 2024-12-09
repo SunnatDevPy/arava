@@ -20,6 +20,7 @@ class ListShopsModel(BaseModel):
     shop_category_id: Optional[int]
     group_id: Optional[int] = None
     photo: Optional[str] = None
+    rating: Optional[int] = None
 
 
 class UpdateShopsModel(BaseModel):
@@ -31,6 +32,7 @@ class UpdateShopsModel(BaseModel):
     group_id: Optional[int] = None
     shop_category_id: Optional[int] = None
     photo: Optional[str] = None
+    rating: Optional[int] = None
 
 
 @shop_router.get(path='', name="Shops")
@@ -77,7 +79,7 @@ async def list_category_shop(operator_id: int,
         if user.status.value in ['moderator', "admin", "superuser"]:
             shop = await Shop.create(owner_id=owner_id, name=name, lat=lat, long=long, group_id=group_id,
                                      shop_category_id=shop_category_id, photo=photo.filename, work_status='CLOSE',
-                                     raiting=0)
+                                     rating=0)
             return {"ok": True, "shop": shop}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
