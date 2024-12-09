@@ -15,7 +15,6 @@ class ShopCategory(BaseModel):
     icon_name: Mapped[str] = mapped_column(nullable=True)
 
 
-
 class Shop(BaseModel):
     class WorkTime(str, Enum):
         OPEN = 'open'

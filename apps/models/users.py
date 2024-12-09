@@ -39,7 +39,6 @@ class User(BaseModel):
     contact: Mapped[str] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
 
-
     def __str__(self):
         return super().__str__() + f" - {self.username}"
 
@@ -49,6 +48,7 @@ class Cart(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("products.id", ondelete='CASCADE'))
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     count: Mapped[float] = mapped_column(nullable=True)
+    total_sum: Mapped[int] = mapped_column(BIGINT, nullable=True)
 
 
 class Order(BaseModel):
@@ -63,6 +63,7 @@ class Order(BaseModel):
     payment: Mapped[bool] = mapped_column(BOOLEAN, default=False)
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder), nullable=True)
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
+    total_sum: Mapped[int] = mapped_column(BIGINT, nullable=True)
 
 
 class OrderItem(BaseModel):

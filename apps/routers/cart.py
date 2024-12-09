@@ -28,7 +28,7 @@ async def list_category_shop(user_id: int, shop_id: int):
     user = await User.get(user_id)
     shop = await Shop.get(shop_id)
     if shop and user:
-        return await get_sum_from_user(user, shop_id)
+        return await get_sum_from_user(shop_id, user)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -37,16 +37,17 @@ async def list_category_shop(user_id: int, shop_id: int):
 async def list_category_shop(user_id: int):
     carts = await Cart.from_user(user_id)
     if carts:
-        return {'carts': carts, "shops": get_shops_unique_cart(carts)}
+        return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
+# , "shops": await get_shops_unique_cart(carts)
 @cart_router.get(path='/from-user-shop', name="Get Cart in Shop")
 async def list_category_shop(user_id: int, shop_id: int):
     carts = await Cart.from_user(user_id)
     if carts:
-        return {'carts': Cart.get_cart_from_shop(user_id, shop_id), "shops": await get_shops_unique_cart(carts)}
+        return {'carts': Cart.get_cart_from_shop(user_id, shop_id)}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -58,8 +59,15 @@ async def list_category_shop(client_id: int,
                              count: int = Form()):
     user = await User.get(client_id)
     product = await Product.get(product_id)
+    sum_ = 0
+    if user.type == 'optom':
+        sum_ += count * product.optom_price
+    elif user.type == 'restorator':
+        sum_ += count * product.restorator_price
+    elif user.type == "one":
+        sum_ += count * product.one_price
     if user and product_id:
-        await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=shop_id)
+        await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=shop_id, total_sum=sum_)
         return {"ok": True}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
