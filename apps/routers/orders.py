@@ -1,13 +1,10 @@
-from fastapi import APIRouter, File, UploadFile, Form, HTTPException
+from fastapi import APIRouter
 from fastapi import Response
 from starlette import status
 
-
-
-from apps.models import User, Shop, ShopPhoto, Cart, Order, OrderItem
+from apps.models import User, Shop, Cart, Order, OrderItem
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
-
 
 
 @order_router.get(path='', name="Orders")

@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter
 from fastapi import Response
@@ -6,23 +6,26 @@ from fastapi.params import Form
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import ShopCategory, User
+from apps.models import ShopCategory, User, Shop
 
 shop_category_router = APIRouter(prefix='/shop-category', tags=['Shop-Category'])
 
 
 class CreateShopCategory(BaseModel):
     name: str
+    icon_name: str
 
 
 class ListShopCategory(BaseModel):
     id: int
     name: str
+    icon_name: str
 
 
 class UpdateShopCategory(BaseModel):
-    shop_category_id: int
-    name: str
+    id: Optional[int] = None
+    name: Optional[str] = None
+    icon_name: Optional[str] = None
 
 
 # List Shop categoriya va Shoplar
@@ -37,6 +40,16 @@ async def list_category_shop(shop_category_id: int):
     category = await ShopCategory.get(shop_category_id)
     if category:
         return {'shop-category': category}
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
+
+@shop_category_router.get(path='/shops', name="Get Shops in Shop-Category")
+async def list_category_shop(shop_category_id: int):
+    category = await ShopCategory.get(shop_category_id)
+    if category:
+        shops = await Shop.get_shops_category(shop_category_id)
+        return {'shops': shops}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 

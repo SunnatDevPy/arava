@@ -14,7 +14,7 @@ class ListCategories(BaseModel):
     id: int
     shop_id: int
     parent_id: Optional[int] = None
-    photo: Optional[str] = None
+    icon_name: Optional[str] = None
 
 
 @category_router.get(path='', name="Categories")
@@ -42,17 +42,15 @@ async def list_category_shop(seller_id: int,
                              shop_id: int = Form(),
                              name: str = Form(),
                              parent_id: int = Form(default=None),
-                             photo: UploadFile = File(),
+                             icon_name: str = Form(default=None),
                              ):
     seller = await User.get(seller_id)
     shop = await Shop.get(shop_id)
-    if not photo.content_type.startswith("image/"):
-        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if seller and shop:
         if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin", "superuser"]:
             if parent_id == 0:
                 parent_id = None
-            await Category.create(name=name, shop_id=shop_id, parent_id=parent_id, photo=photo)
+            await Category.create(name=name, shop_id=shop_id, parent_id=parent_id, icon_name=icon_name)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -66,14 +64,12 @@ async def list_category_shop(operator_id: int,
                              category_id: int,
                              name: str = Form(default=None),
                              parent_id: int = Form(default=None),
-                             photo: UploadFile = File(default=None),
+                             icon_name: str = Form(default=None),
                              ):
     user = await User.get(operator_id)
-    if not photo.content_type.startswith("image/"):
-        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         update_data = {k: v for k, v in
-                       {"name": name, "parent_id": parent_id, "photo": photo} if
+                       {"name": name, "parent_id": parent_id, "icon_name": icon_name} if
                        v is not None}
         if user.status.value in ['moderator', "admin", "superuser"]:
             shop = await Category.get(category_id)

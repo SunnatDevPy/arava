@@ -68,6 +68,7 @@ async def list_category_shop(operator_id: int,
                              one_price: int = Form(default=None),
                              discount_price: int = Form(default=None),
                              description: str = Form(default=None),
+                             photo: UploadFile = File(default=None)
                              ):
     user = await User.get(operator_id)
     if user:
@@ -75,7 +76,7 @@ async def list_category_shop(operator_id: int,
             product = await Product.create(description=description, name=name, owner_id=operator_id,
                                            category_id=category_id,
                                            discount_price=discount_price, restorator_price=restorator_price,
-                                           optom_price=optom_price, one_price=one_price)
+                                           optom_price=optom_price, one_price=one_price, photo=photo.filename)
             return {"ok": True, "product": product, "id": product.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

@@ -14,21 +14,23 @@ class ListShopsModel(BaseModel):
     id: Optional[int]
     owner_id: Optional[int]
     name: Optional[str]
-    work_time: Optional[str]
+    work_status: Optional[str]
     lat: Optional[float]
     long: Optional[float]
     shop_category_id: Optional[int]
     group_id: Optional[int] = None
+    photo: Optional[str] = None
 
 
 class UpdateShopsModel(BaseModel):
     owner_id: Optional[int] = None
     name: Optional[str] = None
-    work_time: Optional[str] = None
+    work_status: Optional[str] = None
     lat: Optional[float] = None
     long: Optional[float] = None
     group_id: Optional[int] = None
     shop_category_id: Optional[int] = None
+    photo: Optional[str] = None
 
 
 @shop_router.get(path='', name="Shops")
@@ -57,29 +59,26 @@ async def list_category_shop(user_id: int):
 
 @shop_router.get(path='/from-category', name="Get Shops in Shop-Category")
 async def list_category_shop(shop_category_id: int):
-    shops = await Shop.get_shops_in_category(shop_category_id)
-    if shops:
-        return shops
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-class CreateShopsModel(BaseModel):
-    owner_id: int
-    name: str
-    lat: float
-    long: float
-    group_id: Optional[int] = None
-    shop_category_id: int
+    shops = await Shop.get_shops_category(shop_category_id)
+    return shops
 
 
 @shop_router.post(path='', name="Create Shop")
-async def list_category_shop(operator_id: int, items: Annotated[CreateShopsModel, Form()]):
+async def list_category_shop(operator_id: int,
+                             owner_id: int = Form(),
+                             name: str = Form(),
+                             lat: float = Form(),
+                             long: float = Form(),
+                             group_id: int = Form(default=None),
+                             shop_category_id: int = Form(default=None),
+                             photo: UploadFile = File(default=None)):
     user = await User.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            await Shop.create(**items.dict(), work_time='CLOSE')
-            return {"ok": True}
+            shop = await Shop.create(owner_id=owner_id, name=name, lat=lat, long=long, group_id=group_id,
+                                     shop_category_id=shop_category_id, photo=photo.filename, work_time='CLOSE',
+                                     raiting=0)
+            return {"ok": True, "shop": shop}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
@@ -95,6 +94,20 @@ async def list_category_shop(operator_id: int, shop_id: int, items: Annotated[Up
         update_data = {k: v for k, v in items.dict() if v is not None}
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
             await Shop.update(shop_id, **update_data)
+            return {"ok": True}
+        else:
+            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
+
+@shop_router.patch(path='', name="Update Shop Photo")
+async def list_category_shop(operator_id: int, shop_id: int, photo: UploadFile = File()):
+    user = await User.get(operator_id)
+    shop = await Shop.get(shop_id)
+    if user and shop:
+        if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
+            await Shop.update(shop_id, photo=photo.filename)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

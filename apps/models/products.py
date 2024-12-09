@@ -1,21 +1,16 @@
 import asyncio
-from enum import Enum
 
-from fastapi_storages import FileSystemStorage
-from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import BigInteger, Enum as SqlEnum, String, VARCHAR, ForeignKey, Integer, CheckConstraint, select, func
+from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, Integer, CheckConstraint, select, func
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy_file import ImageField
 
 from apps.models.database import BaseModel, db
-from apps.models.users import User
 
 
 class Category(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)
     parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('categories.id', ondelete='CASCADE'), nullable=True)
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/category/')))
+    icon_name: Mapped[str] = mapped_column(nullable=True)
 
     def __str__(self):
         if self.parent_id is None:
@@ -62,6 +57,7 @@ class Product(BaseModel):
     one_price: Mapped[int] = mapped_column(Integer)
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
+    photo: Mapped[str] = mapped_column(nullable=True)
     photos: Mapped['ProductPhoto'] = relationship("ProductPhoto", lazy="selectin", back_populates='product')
 
     __table_args__ = (
@@ -76,5 +72,10 @@ class Product(BaseModel):
 
 class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products/')))
+    photo: Mapped[str] = mapped_column(nullable=True)
     product: Mapped['Product'] = relationship("Product", lazy="selectin", back_populates='photos')
+
+    @classmethod
+    async def get_products_photos(cls, product_id):
+        query = select(cls).filter(cls.product_id == product_id)
+        return (await db.execute(query)).scalars().all()
