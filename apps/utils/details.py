@@ -20,7 +20,7 @@ async def get_products_utils(shop_id):
     category = []
     for i in categories:
         products: list['Product'] = await Product.get_products_category(i.id)
-        category.append({'category': i, "products": products, "sum": await sum_from_shop(shop_id)})
+        category.append({'category': i, "products": products})
     return category
 
 
