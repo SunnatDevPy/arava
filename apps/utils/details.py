@@ -15,7 +15,8 @@ async def sum_from_shop(shop_id, user):
     return sum_
 
 
-async def detail_cart(shop_id, user):
+async def detail_cart(shop_id, user_id):
+    user = await User.get(user_id)
     carts: list['Cart'] = await Cart.get_cart_from_shop(shop_id, user.id)
     cart_ = []
     for i in carts:
