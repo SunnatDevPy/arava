@@ -10,9 +10,36 @@ async def sum_from_shop(shop_id, user):
             sum_ += i.count * product.optom_price
         elif user.type == 'restorator':
             sum_ += i.count * product.restorator_price
-        elif user.type == "one":
+        else:
             sum_ += i.count * product.one_price
     return sum_
+
+
+async def detail_cart(shop_id, user):
+    carts: list['Cart'] = await Cart.get_cart_from_shop(shop_id, user.id)
+    cart_ = []
+    for i in carts:
+        sum_ = 0
+        product: 'Product' = await Product.get(i.product_id)
+        if user.type == 'optom':
+            sum_ += i.count * product.optom_price
+            price = product.optom_price
+        elif user.type == 'restorator':
+            sum_ += i.count * product.restorator_price
+            price = product.restorator_price
+        else:
+            sum_ += i.count * product.one_price
+            price = product.one_price
+        cart_.append({
+            'id': i.id,
+            "user_id": i.user_id,
+            "shop_id": i.shop_id,
+            "product_id": i.product_id,
+            "count": i.product_id,
+            "price": price,
+            "sum": sum_
+        })
+    return cart_
 
 
 async def get_products_utils(shop_id):
