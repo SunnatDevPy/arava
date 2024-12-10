@@ -44,7 +44,7 @@ class Shop(BaseModel):
     @classmethod
     async def get_shops_category(cls, id_):
         query = select(cls).select_from(Shop).filter(cls.shop_category_id == id_).order_by(desc(cls.id))
-        return (await db.execute(query)).scalars()
+        return (await db.execute(query)).scalars().all()
 
 
 class ShopPhoto(BaseModel):

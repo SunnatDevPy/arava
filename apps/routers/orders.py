@@ -3,6 +3,7 @@ from fastapi import Response
 from starlette import status
 
 from apps.models import User, Shop, Cart, Order, OrderItem
+from apps.utils.details import sum_from_shop
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
@@ -24,7 +25,16 @@ async def list_category_shop(cart_id: int):
 
 @order_router.get(path='/from-user', name="Get Cart from User")
 async def list_category_shop(user_id: int):
-    orders = await Order.from_user(user_id)
+    orders = await Order.get_cart_from_user(user_id)
+    if orders:
+        return {'orders': orders}
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
+
+@order_router.get(path='/from-user-shop', name="Get Cart from User in Shop")
+async def list_category_shop(user_id: int, shop_id: int):
+    orders = await Order.get_cart_from_shop(user_id, shop_id)
     if orders:
         return {'orders': orders}
     else:
@@ -36,14 +46,14 @@ async def list_category_shop(client_id: int,
                              shop_id: int):
     user = await User.get(client_id)
     shop = await Shop.get(shop_id)
-    if user:
-        carts: list['Cart'] = user.carts
-        await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id)
-        orders: 'Order' = await Order.from_user_order(user.id)
+    if user and shop:
+        carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
+        sum = await sum_from_shop(shop_id, user)
+        order = await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id, total_sum=sum)
         for i in carts:
-            await OrderItem.create(product_id=i.product_id, order_id=orders.id, count=i.count)
+            await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count)
             await Cart.delete(i.id)
-        return {"ok": True, "message": "Buyurtma qabul qilindi va guruxga yuborildi"}
+        return {"ok": True, "message": "Buyurtma qabul qilindi va guruxga yuborildi ", "drive_price": 5000, "time": 60}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 

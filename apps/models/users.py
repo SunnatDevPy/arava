@@ -48,7 +48,6 @@ class Cart(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("products.id", ondelete='CASCADE'))
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     count: Mapped[float] = mapped_column(nullable=True)
-    total_sum: Mapped[int] = mapped_column(BIGINT, nullable=True)
 
 
 class Order(BaseModel):
