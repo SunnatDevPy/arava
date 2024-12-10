@@ -31,7 +31,7 @@ async def get_shops_unique_cart(carts):
     for i in carts:
         shop = await Shop.get(i.shop_id)
         user = await User.get(i.user_id)
-        sum_ = await sum_from_shop(i.shop_id, user.id)
+        sum_ = await sum_from_shop(i.shop_id, user)
         if shop.id not in unique_ids:
             unique_ids.add(shop.id)
             unique_cart.append({'id': shop.id, 'name': shop.name, "sum": sum_})
