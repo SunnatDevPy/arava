@@ -16,9 +16,9 @@ async def list_category_shop():
 
 @order_router.get(path='/detail', name="Get Cart")
 async def list_category_shop(cart_id: int):
-    cart = await Cart.get(cart_id)
+    cart = await Order.get(cart_id)
     if cart:
-        return {'cart': cart}
+        return {'order': cart}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
