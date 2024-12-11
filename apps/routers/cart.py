@@ -38,11 +38,11 @@ async def list_category_shop(user_id: int):
     carts = await Cart.get_cart_from_user(user_id)
     return {'carts': carts}
 
+
 @cart_router.get(path='/from-user-shop', name="Get Cart in Shop")
 async def list_category_shop(user_id: int, shop_id: int):
     carts = await detail_cart(shop_id, user_id)
     return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
-
 
 
 @cart_router.post(path='', name="Create Cart from User")
@@ -73,8 +73,8 @@ async def user_delete(user_id: int, product_id: int):
 
 
 @cart_router.patch(path='', name="Update Cart")
-async def list_category_shop(user_id: int, product_id: int, count: int):
-    cart = await Cart.get_cart_from_product(user_id, product_id)
+async def list_category_shop(user_id: int, cart_id: int, count: int):
+    cart = await Cart.get(cart_id)
     if cart:
         await Cart.update(cart.id, count=count)
         return {"ok": True}
