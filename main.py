@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
     if not os.path.exists('static'):
         os.mkdir('static')
 
-    app.mount("/static", StaticFiles(directory='static'), name='static')
+    app.mount("/media", StaticFiles(directory='media'), name='media')
     app.include_router(user_router)
     app.include_router(product_router)
     # app.include_router(generate_router)

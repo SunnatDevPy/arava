@@ -1,7 +1,9 @@
+from typing import List
+
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi import Response
 from starlette import status
-
+import os
 from apps.models import MainPhoto, User
 
 main_photos_router = APIRouter(prefix='/banners', tags=['Banners'])
@@ -12,6 +14,11 @@ async def list_category_shop():
     photos = await MainPhoto.all()
     return {'photos': photos}
 
+# @main_photos_router.get(path='', name="All banner photos")
+# async def get_photos() -> List[str]:
+#     # Возвращаем список всех фотографий в папке
+#     return [file for file in os.listdir("media/banner") if os.path.isfile(os.path.join("media/banner", file))]
+
 
 @main_photos_router.post(path='', name="Create Banner Photo")
 async def list_category_shop(operator_id: int, photo: UploadFile = File()):
@@ -20,7 +27,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File()):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            await MainPhoto.create(photo=photo.filename)
+            await MainPhoto.create(photo=photo)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

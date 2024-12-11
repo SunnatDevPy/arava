@@ -24,7 +24,7 @@ class Shop(BaseModel):
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
-    photo: Mapped[str] = mapped_column(nullable=True)
+    photo: Mapped[str] = mapped_column(ImageType(storage=FileSystemStorage('media/shop')),nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
     group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
@@ -49,7 +49,7 @@ class Shop(BaseModel):
 
 class ShopPhoto(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
-    photo: Mapped[str] = mapped_column()
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/shop')))
 
     @classmethod
     async def get_shop_photos(cls, id_):

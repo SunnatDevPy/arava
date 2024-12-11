@@ -12,7 +12,7 @@ from apps.models.database import BaseModel
 
 
 class MainPhoto(BaseModel):
-    photo: Mapped[str] = mapped_column()
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/banner')))
 
 
 class User(BaseModel):

@@ -76,7 +76,7 @@ async def list_category_shop(operator_id: int,
             product = await Product.create(description=description, name=name, owner_id=operator_id,
                                            category_id=category_id,
                                            discount_price=discount_price, restorator_price=restorator_price,
-                                           optom_price=optom_price, one_price=one_price, photo=photo.filename)
+                                           optom_price=optom_price, one_price=one_price, photo=photo)
             return {"ok": True, "product": product, "id": product.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)

@@ -1,7 +1,10 @@
 import asyncio
 
+from fastapi_storages import FileSystemStorage
+from fastapi_storages.integrations.sqlalchemy import ImageType
 from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, Integer, CheckConstraint, select, func
 from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy_file import ImageField
 
 from apps.models.database import BaseModel, db
 
@@ -72,7 +75,7 @@ class Product(BaseModel):
 
 class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
-    photo: Mapped[str] = mapped_column(nullable=True)
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products')))
     product: Mapped['Product'] = relationship("Product", lazy="selectin", back_populates='photos')
 
     @classmethod
