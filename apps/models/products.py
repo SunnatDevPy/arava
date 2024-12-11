@@ -62,10 +62,9 @@ class Product(BaseModel):
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
     photos: Mapped['ProductPhoto'] = relationship("ProductPhoto", lazy="selectin", back_populates='product')
+    teg: Mapped[str] = mapped_column()
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)
 
-    __table_args__ = (
-        CheckConstraint('one_price > discount_price'),
-    )
 
     @classmethod
     async def get_products_category(cls, category_id):
