@@ -153,7 +153,7 @@ async def list_category_shop(operator_id: int, shop_id: int, photo: UploadFile =
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-            await ShopPhoto.create(shop_id=shop_id, photo=photo.filename)
+            await ShopPhoto.create(shop_id=shop_id, photo=photo)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
