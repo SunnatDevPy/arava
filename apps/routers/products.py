@@ -62,13 +62,14 @@ async def list_category_shop(shop_id: int):
 @product_router.post(path='', name="Create Prdocut from Category")
 async def list_category_shop(operator_id: int,
                              category_id: int = Form(default=None),
+                             shop_id: int = Form(),
                              name: str = Form(default=None),
                              optom_price: int = Form(default=None),
                              restorator_price: int = Form(default=None),
                              one_price: int = Form(default=None),
                              discount_price: int = Form(default=None),
                              description: str = Form(default=None),
-                             photo: UploadFile = File(default=None)
+                             photo: UploadFile = File(default=None),
                              ):
     user = await User.get(operator_id)
     if user:
@@ -76,7 +77,7 @@ async def list_category_shop(operator_id: int,
             product = await Product.create(description=description, name=name, owner_id=operator_id,
                                            category_id=category_id,
                                            discount_price=discount_price, restorator_price=restorator_price,
-                                           optom_price=optom_price, one_price=one_price, photo=photo)
+                                           optom_price=optom_price, one_price=one_price, photo=photo, shop_id=shop_id)
             return {"ok": True, "product": product, "id": product.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
