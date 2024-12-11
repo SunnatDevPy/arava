@@ -60,7 +60,7 @@ class Product(BaseModel):
     one_price: Mapped[int] = mapped_column(Integer)
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Category.id, ondelete='CASCADE'))
-    photo: Mapped[str] = mapped_column(nullable=True)
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
     photos: Mapped['ProductPhoto'] = relationship("ProductPhoto", lazy="selectin", back_populates='product')
 
     __table_args__ = (
@@ -75,7 +75,7 @@ class Product(BaseModel):
 
 class ProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('products.id', ondelete='CASCADE'))
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/products')))
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
     product: Mapped['Product'] = relationship("Product", lazy="selectin", back_populates='photos')
 
     @classmethod
