@@ -2,6 +2,7 @@ from sqlalchemy import select, or_
 from starlette.requests import Request
 
 from apps.models import Product, Category
+from apps.models.database import BaseModel
 from apps.models.products import ProductPhoto
 from apps.utils.details import get_products_utils
 from config import templates
@@ -105,17 +106,17 @@ async def list_category_shop(operator_id: int,
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
-ProductPhoto
+
+class PhotoModel(BaseModel):
+    id: int
+    photo: str
+    product_id: int
+
 
 @product_router.get(path='/photos', name="Get from Prdoucts Photos")
-async def list_category_shop(product_id: int):
+async def list_category_shop(product_id: int) -> list[PhotoModel]:
     products = await ProductPhoto.get_products_photos(product_id)
-    if products:
-        return products
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
+    return products
 # # Update Shop
 # @product_router.patch(path='', name="Update Shop")
 # async def list_category_shop(operator_id: int,
