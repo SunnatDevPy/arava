@@ -105,6 +105,17 @@ async def list_category_shop(operator_id: int,
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
+ProductPhoto
+
+@product_router.get(path='/photos', name="Get from Prdoucts Photos")
+async def list_category_shop(product_id: int):
+    products = await ProductPhoto.get_products_photos(product_id)
+    if products:
+        return products
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
+
 # # Update Shop
 # @product_router.patch(path='', name="Update Shop")
 # async def list_category_shop(operator_id: int,
