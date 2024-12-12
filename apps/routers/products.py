@@ -1,8 +1,8 @@
+from pydantic import BaseModel
 from sqlalchemy import select, or_
 from starlette.requests import Request
 
 from apps.models import Product, Category
-from apps.models.database import BaseModel
 from apps.models.products import ProductPhoto
 from apps.utils.details import get_products_utils
 from config import templates
