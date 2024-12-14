@@ -1,18 +1,23 @@
-from apps.models import Cart, Product, Category, Shop, User
+from apps.models import Cart, Product, Category, Shop, User, OrderItem
+from apps.models import Order
 
 
 async def sum_from_shop(shop_id, user):
     carts: list['Cart'] = await Cart.get_cart_from_shop(user.id, shop_id)
     sum_ = 0
+    price = 0
     for i in carts:
         product: 'Product' = await Product.get(i.product_id)
         if user.type == 'optom':
             sum_ += i.count * product.optom_price
+            price = product.optom_price
         elif user.type == 'restorator':
             sum_ += i.count * product.restorator_price
+            price = product.restorator_price
         else:
             sum_ += i.count * product.one_price
-    return sum_
+            price = product.one_price
+    return sum_, price
 
 
 async def detail_cart(shop_id, user_id):
@@ -83,7 +88,6 @@ async def get_products_utils(shop_id):
 async def get_shops_unique_cart(carts):
     unique_ids = set()
     unique_cart = []
-
     for i in carts:
         shop = await Shop.get(i['shop_id'])
         user = await User.get(i['user_id'])
@@ -98,3 +102,16 @@ async def check_sum_shops_from_cart(shop_id, user):
     carts: list['Cart'] = await Cart.get_cart_from_shop(user.id, shop_id)
     sum_ = await sum_from_shop(shop_id, user)
     shops = await Shop.all()
+
+
+async def detail_orders(orders: list['Order']):
+    detail_ = []
+    for i in orders:
+        order_items: list['OrderItem'] = await OrderItem.get_order_items(i.id)
+        items = []
+        for j in order_items:
+            product = await Product.get(j.product_id)
+            items.append({'name': product.name, "price": j.price_product, "count": j.count,
+                          "total": j.price_product * j.count})
+        detail_.append({"order": i, "order_items": items})
+    return detail_

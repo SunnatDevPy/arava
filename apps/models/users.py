@@ -69,3 +69,4 @@ class OrderItem(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("products.id", ondelete='CASCADE'))
     order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(Order.id, ondelete='CASCADE'))
     count: Mapped[float] = mapped_column(default=1, nullable=True)
+    price_product: [int]

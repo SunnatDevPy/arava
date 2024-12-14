@@ -28,7 +28,8 @@ async def list_category_shop(user_id: int, shop_id: int):
     user = await User.get(user_id)
     shop = await Shop.get(shop_id)
     if shop and user:
-        return await sum_from_shop(shop_id, user)
+        sum_ = await sum_from_shop(shop_id, user)
+        return sum_[0]
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 

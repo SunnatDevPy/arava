@@ -145,6 +145,10 @@ class AbstractClass:
     async def get_cart_from_user(cls, user_id):
         return (await db.execute(select(cls).where(cls.user_id == user_id))).scalars().all()
 
+    @classmethod
+    async def get_order_items(cls, order_id):
+        return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
+
     # def run_async(self, func, *args, **kwargs):
     #     return asyncio.run(func(*args, **kwargs))
 

@@ -3,7 +3,7 @@ from fastapi import Response
 from starlette import status
 
 from apps.models import User, Shop, Cart, Order, OrderItem
-from apps.utils.details import sum_from_shop
+from apps.utils.details import sum_from_shop, detail_orders
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
@@ -36,7 +36,7 @@ async def list_category_shop(user_id: int):
 async def list_category_shop(user_id: int, shop_id: int):
     orders = await Order.get_cart_from_shop(user_id, shop_id)
     if orders:
-        return {'orders': orders}
+        return {'orders': await detail_orders(orders)}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -48,10 +48,10 @@ async def list_category_shop(client_id: int,
     shop = await Shop.get(shop_id)
     if user and shop:
         carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
-        sum = await sum_from_shop(shop_id, user)
-        order = await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id, total_sum=sum)
+        sum_ = await sum_from_shop(shop_id, user)
+        order = await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id, total_sum=sum_[0])
         for i in carts:
-            await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count)
+            await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count, price_product=sum_[-1])
             await Cart.delete(i.id)
         return {"ok": True, "message": "Buyurtma qabul qilindi va guruxga yuborildi ", "drive_price": 5000, "time": 60}
     else:
