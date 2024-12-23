@@ -3,7 +3,7 @@ from fastapi import Response
 from starlette import status
 
 from apps.models import User, Shop, ShopPhoto, Cart, Product
-from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart
+from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 
@@ -44,6 +44,11 @@ async def list_category_shop(user_id: int):
 async def list_category_shop(user_id: int, shop_id: int):
     carts = await detail_cart(shop_id, user_id)
     return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
+
+
+@cart_router.get(path='/shop_by_user', name="Get Cart in Shop")
+async def list_category_shop(user_id: int):
+    return {"shops": await get_carts_(user_id)}
 
 
 @cart_router.post(path='', name="Create Cart from User")
