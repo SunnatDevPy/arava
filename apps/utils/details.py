@@ -98,6 +98,16 @@ async def get_shops_unique_cart(carts):
     return unique_cart
 
 
+async def get_carts_(user_id):
+    carts = await Cart.get_cart_from_user(user_id)
+    shops = await get_shops_unique_cart(carts)
+    list_ = []
+    for i in shops:
+        cart_from_shop = await Cart.get_cart_from_shop(user_id, i['id'])
+        list_.append({"shop": i, "carts": cart_from_shop})
+    return list_
+
+
 async def check_sum_shops_from_cart(shop_id, user):
     carts: list['Cart'] = await Cart.get_cart_from_shop(user.id, shop_id)
     sum_ = await sum_from_shop(shop_id, user)
