@@ -1,8 +1,8 @@
-from fastapi import APIRouter, File, UploadFile, Form, HTTPException
+from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from apps.models import User, Shop, ShopPhoto, Cart, Product
+from apps.models import User, Shop, Cart
 from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])

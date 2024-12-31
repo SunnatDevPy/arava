@@ -3,10 +3,9 @@ from enum import Enum
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
 from sqlalchemy import BigInteger, Enum as SqlEnum, VARCHAR, ForeignKey, select, desc, Integer
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy_file import ImageField
 
-from apps.models import User, Category
 from apps.models.database import BaseModel, db
 
 
@@ -24,7 +23,7 @@ class Shop(BaseModel):
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')),nullable=True)
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
     group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)

@@ -3,14 +3,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from sqladmin import Admin
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse
 
-from apps.admin import ProductAdmin, CategoryAdmin, ProductPhotoAdmin, MainPhotoAdmin
 from apps.models import db
-from apps.routers import product_router, user_router, shop_category_router, \
+from apps.routers import shop_product_router, panel_product_router, panel_category_router, user_router, \
+    shop_category_router, \
     main_photos_router, category_router
 from apps.routers.cart import cart_router
 from apps.routers.orders import order_router
@@ -25,14 +24,16 @@ async def lifespan(app: FastAPI):
 
     app.mount("/media", StaticFiles(directory='media'), name='media')
     app.include_router(user_router)
-    app.include_router(product_router)
+    app.include_router(shop_product_router)
     # app.include_router(generate_router)
     app.include_router(shop_router)
     app.include_router(shop_category_router)
     app.include_router(main_photos_router)
     app.include_router(order_router)
-    app.include_router(category_router)
+    app.include_router(panel_category_router)
+    app.include_router(panel_product_router)
     app.include_router(cart_router)
+    app.include_router(category_router)
     await db.create_all()
     yield
 
@@ -47,12 +48,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-admin = Admin(app, db._engine)
-admin.add_view(ProductAdmin)
-admin.add_view(CategoryAdmin)
-admin.add_view(ProductPhotoAdmin)
-admin.add_view(MainPhotoAdmin)
 
 
 # minio_handler = MinioHandler(

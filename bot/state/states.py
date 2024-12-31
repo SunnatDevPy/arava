@@ -17,3 +17,6 @@ class Contact(StatesGroup):
     phone = State()
     location = State()
     confirm = State()
+
+class Location(StatesGroup):
+    location = State()

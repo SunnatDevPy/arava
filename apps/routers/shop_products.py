@@ -1,19 +1,14 @@
-from pydantic import BaseModel
-from sqlalchemy import select, or_
-from starlette.requests import Request
+import os
 
-from apps.models import Product, Category
-from apps.models.products import ProductPhoto
-from apps.utils.details import get_products_utils
-from config import templates
-
-from fastapi import APIRouter, File, UploadFile, Form, HTTPException
+from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
+from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, Shop, ShopPhoto
+from apps.models import ShopProductPhoto, ShopProduct, ShopProductCategory, User, Shop, PanelProduct
+from apps.utils.details import get_products_utils
 
-product_router = APIRouter(prefix='/products', tags=['Product'])
+shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
 
 
 # @product_router.post("/")
@@ -45,13 +40,13 @@ product_router = APIRouter(prefix='/products', tags=['Product'])
 #     return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
 
 
-@product_router.get(path='', name="Get All Products")
+@shop_product_router.get(path='', name="Get All Products")
 async def list_category_shop():
-    products = await Product.all()
+    products = await ShopProduct.all()
     return {"products": products}
 
 
-@product_router.get(path='/from-shop', name="Get from Shop Products")
+@shop_product_router.get(path='/from-shop', name="Get from Shop Products")
 async def list_category_shop(shop_id: int):
     products = await get_products_utils(shop_id)
     if products:
@@ -60,46 +55,45 @@ async def list_category_shop(shop_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@product_router.post(path='', name="Create Prdocut from Category")
+@shop_product_router.post(path='', name="Create Prdocut from Category")
 async def list_category_shop(operator_id: int,
-                             category_id: int = Form(default=None),
+                             shtrix_code: int = Form(),
+                             shop_category_id: int = Form(default=None),
                              shop_id: int = Form(),
-                             name: str = Form(default=None),
-                             optom_price: int = Form(default=None),
-                             restorator_price: int = Form(default=None),
-                             one_price: int = Form(default=None),
-                             discount_price: int = Form(default=None),
-                             description: str = Form(default=None),
-                             photo: UploadFile = File(default=None),
-                             teg: str = Form()
-                             ):
+                             one_price: int = Form(),
+                             discount_price: int = Form(default=0),
+                             description: str = Form(default=None)):
     user = await User.get(operator_id)
-    if user:
-        if user.status.value in ['moderator', "admin", "superuser"]:
-            product = await Product.create(description=description, name=name, owner_id=operator_id,
-                                           category_id=category_id,
-                                           discount_price=discount_price, restorator_price=restorator_price,
-                                           optom_price=optom_price, one_price=one_price, photo=photo, shop_id=shop_id,
-                                           teg=teg)
-            return {"ok": True, "product": product, "id": product.id}
+    product: PanelProduct = await PanelProduct.get_product_shtrix(shtrix_code)
+    category = await ShopProductCategory.get(shop_category_id)
+    shop = await Shop.get(shop_id)
+    if user and product and category and shop:
+        if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
+            photo = os.path.exists(str(product.photo))
+            product = await ShopProduct.create(description=description, name=product.name, owner_id=operator_id,
+                                               category_id=shop_category_id,
+                                               discount_price=discount_price, restorator_price=0,
+                                               optom_price=0, one_price=one_price, photo=photo, shop_id=shop_id,
+                                               shtrix_code=shtrix_code)
+            return {"ok": True, "id": product.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@product_router.post(path='/photos', name="Create Product Photo")
+@shop_product_router.post(path='/photos', name="Create Product Photo")
 async def list_category_shop(operator_id: int,
                              product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
     user = await User.get(operator_id)
-    shop = await Product.get(product_id)
+    shop = await ShopProductPhoto.get(product_id)
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-            await ProductPhoto.create(product_id=product_id, photo=photo)
+            await ShopProductPhoto.create(product_id=product_id, photo=photo)
             return {"ok": True}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -113,12 +107,13 @@ class PhotoModel(BaseModel):
     product_id: int
 
 
-@product_router.get(path='/photos', name="Get from Prdoucts Photos")
+@shop_product_router.get(path='/photos', name="Get from Prdoucts Photos")
 async def list_category_shop(product_id: int) -> list[PhotoModel]:
-    products = await ProductPhoto.get_products_photos(product_id)
+    products = await ShopProductPhoto.get_products_photos(product_id)
     return products
+
 # # Update Shop
-# @product_router.patch(path='', name="Update Shop")
+# @shop_product_router.patch(path='', name="Update Shop")
 # async def list_category_shop(operator_id: int,
 #                              shop_id: int = Form(),
 #                              name: str = Form(default=None),
@@ -146,7 +141,7 @@ async def list_category_shop(product_id: int) -> list[PhotoModel]:
 #         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 #
 #
-# @product_router.delete(path='', name="Delete Shop")
+# @shop_product_router.delete(path='', name="Delete Shop")
 # async def list_category_shop(operator_id: int, shop_id: int):
 #     user = await User.get(operator_id)
 #     shop = await Shop.get(shop_id)
@@ -160,7 +155,7 @@ async def list_category_shop(product_id: int) -> list[PhotoModel]:
 #         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 #
 #
-# @product_router.get(path='/photos', name="Get Photos Product")
+# @shop_product_router.get(path='/photos', name="Get Photos Product")
 # async def list_category_shop(product_id: int):
 #     products = await Product.get(product_id)
 #     if products:
@@ -169,7 +164,7 @@ async def list_category_shop(product_id: int) -> list[PhotoModel]:
 #         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 #
 #
-# @product_router.post(path='/photos', name="Create Shop Photo")
+# @shop_product_router.post(path='/photos', name="Create Shop Photo")
 # async def list_category_shop(operator_id: int,
 #                              product_id: int = Form(),
 #                              photo: UploadFile = File(default=None),

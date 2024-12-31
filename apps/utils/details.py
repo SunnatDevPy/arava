@@ -1,4 +1,4 @@
-from apps.models import Cart, Product, Category, Shop, User, OrderItem
+from apps.models import Cart, ShopProductPhoto, ShopProduct, ShopProductCategory, PanelCategory, PanelProduct, Shop, User, OrderItem
 from apps.models import Order
 
 
@@ -7,7 +7,7 @@ async def sum_from_shop(shop_id, user):
     sum_ = 0
     price = 0
     for i in carts:
-        product: 'Product' = await Product.get(i.product_id)
+        product: 'ShopProduct' = await ShopProduct.get(i.product_id)
         if user.type == 'optom':
             sum_ += i.count * product.optom_price
             price = product.optom_price
@@ -26,7 +26,7 @@ async def detail_cart(shop_id, user_id):
     cart_ = []
     for i in carts:
         sum_ = 0
-        product: 'Product' = await Product.get(i.product_id)
+        product: 'ShopProduct' = await ShopProduct.get(i.product_id)
         if user.type == 'optom':
             sum_ += i.count * product.optom_price
             price = product.optom_price
@@ -77,10 +77,10 @@ async def detail_cart(shop_id, user_id):
 
 
 async def get_products_utils(shop_id):
-    categories: list['Category'] = await Category.get_shop_categories(shop_id)
+    categories: list['ShopProductCategory'] = await ShopProductCategory.get_shop_categories(shop_id)
     category = []
     for i in categories:
-        products: list['Product'] = await Product.get_products_category(i.id)
+        products: list['ShopProduct'] = await ShopProduct.get_products_category(i.id)
         category.append({'category': i, "products": products})
     return category
 
@@ -120,7 +120,7 @@ async def detail_orders(orders: list['Order']):
         order_items: list['OrderItem'] = await OrderItem.get_order_items(i.id)
         items = []
         for j in order_items:
-            product = await Product.get(j.product_id)
+            product = await ShopProduct.get(j.product_id)
             items.append({'name': product.name, "price": j.price_product, "count": j.count,
                           "total": j.price_product * j.count})
         detail_.append({"order": i, "order_items": items})

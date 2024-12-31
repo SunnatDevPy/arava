@@ -81,7 +81,7 @@ async def list_category_shop(operator_id: int,
             shop = await Shop.create(owner_id=owner_id, name=name, lat=lat, long=long, group_id=group_id,
                                      shop_category_id=shop_category_id, photo=photo, work_status='CLOSE',
                                      rating=0, discount_price=discount_price)
-            return {"ok": True, "shop": shop}
+            return {"ok": True, "shop_id": shop.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
@@ -123,7 +123,7 @@ async def list_category_shop(operator_id: int, shop_id: int):
     user = await User.get(operator_id)
     shop = await Shop.get(shop_id)
     if user and shop:
-        if user.status.value in ["admin", "superuser"]:
+        if user.status.value in ["moderator", "admin", "superuser"]:
             await Shop.delete(shop)
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
         else:
@@ -153,8 +153,8 @@ async def list_category_shop(operator_id: int, shop_id: int, photo: UploadFile =
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-            await ShopPhoto.create(shop_id=shop_id, photo=photo)
-            return {"ok": True}
+            shop_photo = await ShopPhoto.create(shop_id=shop_id, photo=photo)
+            return {"ok": True, "id": shop_photo.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:

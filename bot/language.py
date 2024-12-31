@@ -32,12 +32,12 @@ async def language_handler(call: CallbackQuery, state: FSMContext):
             f'{salom} {call.from_user.first_name}, {davom}',
             reply_markup=contact())
     else:
-        if call.from_user.id in [5649321700,]:
+        if call.from_user.id in [5649321700, ]:
             await call.message.answer(f'{salom} Admin {call.from_user.first_name}',
                                       reply_markup=ReplyKeyboardRemove())
             await call.message.answer(bosh,
-                                      reply_markup=main_menu(call.from_user.id, lang_code, admin=True))
+                                      reply_markup=main_menu())
         else:
             await call.message.answer(f"{salom} {call.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
             await call.message.answer(bosh,
-                                      reply_markup=main_menu(call.from_user.id, lang_code))
+                                      reply_markup=main_menu())

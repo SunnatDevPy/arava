@@ -1,101 +1,98 @@
-from typing import Annotated, Optional
+from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Form
 from fastapi import Response
-from fastapi.params import Form
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import ShopCategory, User, Shop
+from apps.models import User, ShopProductCategory, Shop
 
-shop_category_router = APIRouter(prefix='/shop-category', tags=['Shop-Category'])
-
-
-class CreateShopCategory(BaseModel):
-    name: str
-    icon_name: str
+shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categories'])
 
 
-class ListShopCategory(BaseModel):
+class ListCategories(BaseModel):
     id: int
-    name: str
-    icon_name: str
-
-
-class UpdateShopCategory(BaseModel):
-    id: Optional[int] = None
-    name: Optional[str] = None
+    shop_id: int
+    parent_id: Optional[int] = None
     icon_name: Optional[str] = None
 
 
-# List Shop categoriya va Shoplar
-@shop_category_router.get(path='', name="All shop category")
-async def list_category_shop():
-    shop_category = await ShopCategory.all()
-    return shop_category
+@shop_category_router.get(path='', name="Categories")
+async def list_category_shop() -> list[ListCategories]:
+    categories = await ShopProductCategory.all()
+    return categories
 
 
-@shop_category_router.get(path='/detail', name="Get Shop Category Detail")
-async def list_category_shop(shop_category_id: int):
-    category = await ShopCategory.get(shop_category_id)
-    if category:
-        return {'shop-category': category}
+@shop_category_router.get(path='/from-shop', name="List from Shop")
+async def list_category_shop(shop_id: int):
+    shop = await Shop.get(shop_id)
+    if shop:
+        category = await ShopProductCategory.get_shop_categories(shop_id)
+        return category
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@shop_category_router.get(path='/shops', name="Get Shops in Shop-Category")
-async def list_category_shop(shop_category_id: int):
-    category = await ShopCategory.get(shop_category_id)
-    if category:
-        shops = await Shop.get_shops_category(shop_category_id)
-        return {'shops': shops}
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-@shop_category_router.post(path='/shop-category', name="Create Shop Category")
-async def list_category_shop(operator_id: int, items: Annotated[CreateShopCategory, Form()]):
-    user = await User.get(operator_id)
-    if user:
-        if user.status.value in ['moderator', "admin", "superuser"]:
-            await ShopCategory.create(name=items.name, icon_name=items.icon_name)
-            return {"ok": True}
+@shop_category_router.post(path='/', name="Create Category")
+async def list_category_shop(seller_id: int,
+                             shop_id: int = Form(),
+                             name: str = Form(),
+                             parent_id: int = Form(default=None),
+                             icon_name: str = Form(default=None),
+                             ):
+    seller = await User.get(seller_id)
+    shop = await Shop.get(shop_id)
+    if seller and shop:
+        if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin", "superuser"]:
+            if parent_id == 0:
+                parent_id = None
+            categ = await ShopProductCategory.create(name=name, shop_id=shop_id, parent_id=parent_id,
+                                                     icon_name=icon_name)
+            return {"ok": True, "id": categ.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-# Update Shop categoriya
-@shop_category_router.patch(path='/shop-category', name="Update Shop Category")
-async def list_category_shop(operator_id: int, items: Annotated[UpdateShopCategory, Form()]):
-    shop_category = await ShopCategory.get(items.shop_category_id)
+# # Update Category
+@shop_category_router.patch(path='/', name="Update Category")
+async def list_category_shop(operator_id: int,
+                             category_id: int,
+                             name: str = Form(default=None),
+                             parent_id: int = Form(default=None),
+                             icon_name: str = Form(default=None),
+                             ):
     user = await User.get(operator_id)
-    if user and shop_category:
+    if user:
+        update_data = {k: v for k, v in
+                       {"name": name, "parent_id": parent_id, "icon_name": icon_name} if
+                       v is not None}
         if user.status.value in ['moderator', "admin", "superuser"]:
-            name = None
-            icon_name = None
-            if items.name:
-                pass
-            if shop_category:
-                await ShopCategory.update(items.shop_category_id, name=items.shop_category_id)
+            shop = await ShopProductCategory.get(category_id)
+            if shop:
+                await ShopProductCategory.update(category_id, **update_data)
                 return {"ok": True}
+            else:
+                return Response("Bunday sho'p id yo'q", status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@shop_category_router.delete(path='/shop-category', name="Delete Shop Category")
-async def list_category_shop(operator_id: int, category_id: int):
+@shop_category_router.delete(path='/', name="Delete Category")
+async def list_category_shop(category_id: int, operator_id: int):
     user = await User.get(operator_id)
-    category = await ShopCategory.get(category_id)
-    if user and category:
+    if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            await ShopCategory.delete(category_id)
-            return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+            category = await ShopProductCategory.get(category_id)
+            if category:
+                await ShopProductCategory.delete(category_id)
+                return {"ok": True}
+            else:
+                return Response("Bunday sho'p id yo'q", status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)

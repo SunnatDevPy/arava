@@ -1,12 +1,13 @@
+import asyncio
+
 from aiogram import Router, html, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery, menu_button
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
-from bot.buttuns.inline import main_menu, contact, language_inl, get_location, confirm_register_inl
-from bot.state.states import Contact
 from apps.models import User
+from bot.buttuns.inline import main_menu, language_inl, get_location, confirm_register_inl, menu
+from bot.state.states import Contact, Location
 
 start_router = Router()
 
@@ -45,6 +46,8 @@ async def command_start(message: Message, state: FSMContext):
     #         await state.update_data(referred_id=inviter_id, referred_user_id=message.from_user.id)
 
 
+# menu()
+
 @start_router.message(Contact.phone)
 async def register_full_name(msg: Message, state: FSMContext):
     await state.set_state(Contact.location)
@@ -82,15 +85,42 @@ async def register_full_name(call: CallbackQuery, state: FSMContext):
     if confirm[0] == 'confirm':
         user_data = {'id': from_user.id, 'username': from_user.username,
                      'first_name': from_user.first_name, "last_name": from_user.last_name, "long": data.get('long'),
-                     "lat": data.get('lat'), "contact": str(data.get('contact')), 'status': "SUPERUSER" if from_user.id == 5649321700 else "USER", 'type': 'one'}
+                     "lat": data.get('lat'), "contact": str(data.get('contact')),
+                     'status': "SUPERUSER" if from_user.id == 5649321700 else "USER", 'type': 'one'}
         await User.create(**user_data)
         if call.from_user.id in [5649321700, ]:
             await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
-                                      reply_markup=main_menu(call.from_user.id, data.get('locale')))
+                                      reply_markup=menu(call.from_user.id))
         else:
             await call.message.answer(f'Xush kelibsiz {call.from_user.first_name}',
-                                      reply_markup=main_menu(call.from_user.id, data.get('locale')))
+                                      reply_markup=menu(call.from_user.id))
+        await asyncio.sleep(60)
+        await call.message.delete()
+        await call.message.answer("Bosh Menu", reply_markup=ReplyKeyboardRemove())
+        await call.message.answer("", reply_markup=main_menu())
+
         await state.clear()
     else:
         await state.set_state(Contact.phone)
         await call.message.answer("Qayta ro'yxatdan o'ting")
+
+
+@start_router.callback_query(F.data == 'menu')
+async def register_full_name(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
+    await state.set_state(Location.location)
+    await call.message.answer("Mahsulotni qayerga jo'natish uchun locatsiya kiriting!", reply_markup=get_location())
+
+
+@start_router.message(Location.location)
+async def register_full_name(message: Message, state: FSMContext):
+    if message.location:
+        data = await state.get_data()
+        await User.update(message.from_user.id, lat=message.location.latitude, long=message.location.longitude)
+        await message.answer("Menu", reply_markup=menu(message.from_user.id, language=data.get('locale')))
+        await asyncio.sleep(60)
+        await message.delete()
+        await message.answer("Bosh Menu", reply_markup=main_menu())
+        await state.clear()
+    else:
+        await message.answer("Locatsiya kiriting", reply_markup=get_location())

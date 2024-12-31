@@ -2,12 +2,14 @@ from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
+
 def language_inl():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text='🇺🇿Uz', callback_data='lang_uz'),
               InlineKeyboardButton(text='🇷🇺Ru', callback_data='lang_rus')])
     ikb.adjust(2)
     return ikb.as_markup()
+
 
 def confirm_register_inl():
     ikb = InlineKeyboardBuilder()
@@ -16,7 +18,15 @@ def confirm_register_inl():
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
-def main_menu(user_id, language='uz', admin=False):
+
+def main_menu():
+    ikb = InlineKeyboardBuilder()
+    ikb.add(*[InlineKeyboardButton(text="🍽Menu🍽", callback_data="menu"),
+              InlineKeyboardButton(text="🏠Mening manzillarim🏠", callback_data="menu")])
+    return ikb.as_markup()
+
+
+def menu(user_id, language='uz', admin=False):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🛒ARAVA🛒",
                                    web_app=WebAppInfo(
