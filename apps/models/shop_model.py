@@ -33,7 +33,7 @@ class Shop(BaseModel):
     @classmethod
     async def get_shops_from_user(cls, id_):
         query = select(cls).order_by(desc(cls.id)).filter(cls.owner_id == id_)
-        return (await db.execute(query)).scalars()
+        return (await db.execute(query)).scalars().all()
 
     # @classmethod
     # async def get_shops_in_category(cls, id_):
