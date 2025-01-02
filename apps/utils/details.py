@@ -96,6 +96,21 @@ async def get_products_utils(shop_id):
 async def get_shops_unique_cart(carts):
     unique_ids = set()
     unique_cart = []
+
+    for i in carts:
+        shop = await Shop.get(i.get('shop_id'))
+        user = await User.get(i.get("user_id"))
+        sum_ = await sum_from_shop(shop.id, user)
+        if shop.id not in unique_ids:
+            unique_ids.add(shop.id)
+            unique_cart.append({'id': shop.id, 'name': shop.name, "sum": sum_})
+    return unique_cart
+
+
+async def get_shops_unique(carts):
+    unique_ids = set()
+    unique_cart = []
+
     for i in carts:
         shop = await Shop.get(i.shop_id)
         user = await User.get(i.user_id)
@@ -108,7 +123,7 @@ async def get_shops_unique_cart(carts):
 
 async def get_carts_(user_id):
     carts = await Cart.get_cart_from_user(user_id)
-    shops = await get_shops_unique_cart(carts)
+    shops = await get_shops_unique(carts)
     list_ = []
     for i in shops:
         cart_from_shop = await Cart.get_cart_from_shop(user_id, i['id'])
@@ -133,7 +148,6 @@ async def detail_orders(orders: list['Order']):
                           "total": j.price_product * j.count})
         detail_.append({"order": i, "order_items": items})
     return detail_
-
 
 # async def detail_orders_all_statuses(orders: list['Order']):
 #     detail_ = []

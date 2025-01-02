@@ -46,7 +46,7 @@ async def list_category_shop(user_id: int, shop_id: int):
     return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
 
 
-@cart_router.get(path='/shop_by_user', name="Get Cart in Shop")
+@cart_router.get(path='/by_user', name="Get Cart in Shop")
 async def list_category_shop(user_id: int):
     return {"shops": await get_carts_(user_id)}
 
