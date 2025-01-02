@@ -2,7 +2,7 @@ from enum import Enum
 
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import BigInteger, Enum as SqlEnum, VARCHAR, ForeignKey, select, desc, Integer
+from sqlalchemy import BigInteger, Enum as SqlEnum, VARCHAR, ForeignKey, select, desc, Integer, JSON
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy_file import ImageField
 
@@ -54,3 +54,10 @@ class ShopPhoto(BaseModel):
     async def get_shop_photos(cls, id_):
         query = select(cls).select_from(ShopPhoto).filter(cls.shop_id == id_).order_by(desc(cls.id))
         return (await db.execute(query)).scalars()
+
+
+class WorkTimes(BaseModel):
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
+    open_time: Mapped[str]
+    close_time: Mapped[str]
+    weeks: Mapped[list] = mapped_column(JSON)

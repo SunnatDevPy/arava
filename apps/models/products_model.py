@@ -92,6 +92,11 @@ class ShopProductCategory(BaseModel):
         query = select(cls).filter(cls.shop_id == id_)
         return (await db.execute(query)).scalars().all()
 
+    @classmethod
+    async def get_from_shop(cls, shop_id, category_id):
+        query = select(cls).filter(cls.shop_id == shop_id, cls.id == category_id)
+        return (await db.execute(query)).scalars().all()
+
 
 class ShopProduct(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))

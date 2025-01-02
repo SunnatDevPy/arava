@@ -63,30 +63,32 @@ async def list_category_shop(operator_id: int,
                              description: str = Form(default=None)):
     user = await User.get(operator_id)
     product: PanelProduct = await PanelProduct.get_product_shtrix(shtrix_code)
-    category = await ShopProductCategory.get(shop_category_id)
+    category = await ShopProductCategory.get_from_shop(shop_id, shop_category_id)
     shop = await Shop.get(shop_id)
-    if user and product and category and shop:
-        if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-            if user.status.value == 'moderator' and one_price:
-                return Response("Moderator narx kiritolmaydi", status.HTTP_404_NOT_FOUND)
+    if user and product and shop:
+        if category:
+            if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
+                if user.status.value == 'moderator' and one_price:
+                    return Response("Moderator narx kiritolmaydi", status.HTTP_404_NOT_FOUND)
 
-            product = await ShopProduct.create(
-                description=description,
-                name=product.name,
-                owner_id=operator_id,
-                category_id=shop_category_id,
-                discount_price=discount_price,
-                restorator_price=0,
-                optom_price=0,
-                one_price=one_price,
-                shop_id=shop_id,
-                shtrix_code=shtrix_code
-            )
-            return {"ok": True, "id": product.id}
+                product = await ShopProduct.create(
+                    description=description,
+                    name=product.name,
+                    owner_id=operator_id,
+                    category_id=shop_category_id,
+                    discount_price=discount_price,
+                    restorator_price=0,
+                    optom_price=0,
+                    one_price=one_price,
+                    shop_id=shop_id,
+                    shtrix_code=shtrix_code
+                )
+                return {"ok": True, "id": product.id}
 
+            else:
+                return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-
+            return Response("Category id shop id ga tegishli emas", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -121,34 +123,35 @@ async def list_category_shop(product_id: int) -> list[PhotoModel]:
     products = await ShopProductPhoto.get_products_photos(product_id)
     return products
 
-# # Update Shop
-# @shop_product_router.patch(path='', name="Update Shop")
-# async def list_category_shop(operator_id: int,
-#                              shop_id: int = Form(),
-#                              name: str = Form(default=None),
-#                              long: float = Form(default=None),
-#                              lat: float = Form(default=None),
-#                              shop_category_id: int = Form(default=None),
-#                              work_time: str = Form(default="CLOSE"),
-#                              ):
-#     user = await User.get(operator_id)
-#     shop = await Shop.get(shop_id)
-#     if not photo.content_type.startswith("image/"):
-#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-#     if user and shop:
-#         update_data = {k: v for k, v in
-#                        {"name": name, "shop_category_id": shop_category_id, "photo": photo,
-#                         "work_time": work_time, "log": long, "lat": lat}.items() if
-#                        v is not None}
-#
-#         if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
-#             await Shop.update(shop_id, **update_data)
-#             return {"ok": True}
-#         else:
-#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-#     else:
-#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-#
+
+# Update Shop
+@shop_product_router.patch(path='', name="Update Shop")
+async def list_category_shop(operator_id: int,
+                             shop_id: int = Form(),
+                             name: str = Form(default=None),
+                             long: float = Form(default=None),
+                             lat: float = Form(default=None),
+                             shop_category_id: int = Form(default=None),
+                             work_time: str = Form(default="CLOSE"),
+                             ):
+    user = await User.get(operator_id)
+    shop = await Shop.get(shop_id)
+    if not photo.content_type.startswith("image/"):
+        return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+    if user and shop:
+        update_data = {k: v for k, v in
+                       {"name": name, "shop_category_id": shop_category_id, "photo": photo,
+                        "work_time": work_time, "log": long, "lat": lat}.items() if
+                       v is not None}
+
+        if user.status.value in ['moderator', "admin"] or user.id == shop.owner_id:
+            await Shop.update(shop_id, **update_data)
+            return {"ok": True}
+        else:
+            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+    else:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
 #
 # @shop_product_router.delete(path='', name="Delete Shop")
 # async def list_category_shop(operator_id: int, shop_id: int):
