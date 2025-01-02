@@ -10,7 +10,7 @@ from starlette.responses import JSONResponse
 from apps.models import db
 from apps.routers import shop_product_router, panel_product_router, panel_category_router, user_router, \
     shop_category_router, \
-    main_photos_router, category_router
+    main_photos_router, category_router, work_router, payment_router
 from apps.routers.cart import cart_router
 from apps.routers.orders import order_router
 from apps.routers.shop import shop_router
@@ -34,6 +34,8 @@ async def lifespan(app: FastAPI):
     app.include_router(panel_product_router)
     app.include_router(cart_router)
     app.include_router(category_router)
+    app.include_router(work_router)
+    app.include_router(payment_router)
     await db.create_all()
     yield
 
