@@ -27,7 +27,7 @@ async def list_category_shop(payment_id: int):
 
 @payment_router.post(path='', name="Create payments")
 async def list_category_shop(admin_id: int,
-                             name: int = Form(),
+                             name: str = Form(),
                              status_: bool = Form(default=False),
                              token: str = Form()):
     user = await User.get(admin_id)
