@@ -7,7 +7,7 @@ from starlette import status
 
 from apps.models import User, Shop, WorkTimes, Payment
 
-payment_router = APIRouter(prefix='/work', tags=['Work Shop'])
+payment_router = APIRouter(prefix='/payment', tags=['Payment Shop'])
 
 
 @payment_router.get(path='', name="Payment all")
