@@ -1,4 +1,5 @@
-from apps.models import Cart, ShopProductPhoto, ShopProduct, ShopProductCategory, PanelCategory, PanelProduct, Shop, User, OrderItem
+from apps.models import Cart, ShopProductPhoto, ShopProduct, ShopProductCategory, PanelCategory, PanelProduct, Shop, \
+    User, OrderItem
 from apps.models import Order
 
 
@@ -81,7 +82,14 @@ async def get_products_utils(shop_id):
     category = []
     for i in categories:
         products: list['ShopProduct'] = await ShopProduct.get_products_category(i.id)
-        category.append({'category': i, "products": products})
+        prod = []
+        for i in products:
+            shtrix_code = await PanelProduct.get_product_shtrix(i.shtrix_code)
+            if i.photo == None:
+                prod.append({'product': i, "photo": shtrix_code.photo})
+            else:
+                prod.append({'product': i, "photo": shtrix_code.photo})
+        category.append({'category': i, "products": prod})
     return category
 
 
@@ -125,3 +133,16 @@ async def detail_orders(orders: list['Order']):
                           "total": j.price_product * j.count})
         detail_.append({"order": i, "order_items": items})
     return detail_
+
+
+# async def detail_orders_all_statuses(orders: list['Order']):
+#     detail_ = []
+#     for i in orders:
+#         order_items: list['OrderItem'] = await OrderItem.get_order_items(i.id)
+#         items = []
+#         for j in order_items:
+#             product = await ShopProduct.get(j.product_id)
+#             items.append({'name': product.name, "price": j.price_product, "count": j.count,
+#                           "total": j.price_product * j.count})
+#         detail_.append({"order": i, "order_items": items})
+#     return detail_

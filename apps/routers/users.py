@@ -95,7 +95,6 @@ class UserUpdate(BaseModel):
 
 
 class UserUpdateStatus(BaseModel):
-    user_id: Optional[int]
     status: Optional[str] = None
     type: Optional[str] = None
 
@@ -110,9 +109,9 @@ async def user_detail(user_id: int):
 
 
 @user_router.patch("/profile", name="Update User")
-async def user_patch_update(user_id: int, items: Annotated[UserUpdate, Form()]):
-    user = await User.get(user_id)
-    if user:
+async def user_patch_update(operator_id: int, items: Annotated[UserUpdate, Form()]):
+    user = await User.get(operator_id)
+    if user and operator_id:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if update_data:
             await User.update(user.id, **update_data)
@@ -124,16 +123,16 @@ async def user_patch_update(user_id: int, items: Annotated[UserUpdate, Form()]):
 
 
 @user_router.patch("/status", name="Update Status")
-async def user_add(operator_id: int, items: Annotated[UserUpdateStatus, Form()]):
-    user = await User.get(operator_id)
-    if user:
-        if user.status.value in ['moderator', "admin"]:
+async def user_add(operator_id: int, user_id: int, items: Annotated[UserUpdateStatus, Form()]):
+    operator = await User.get(operator_id)
+    user = await User.get(user_id)
+    if operator:
+        if operator.status.value in ['moderator', "admin", "superuser"]:
+            if operator.status.value == "moderator" and items.status:
+                raise HTTPException(status_code=404, detail="Moderator status o'zgartirolmaydi faqatgina typle larni")
             update_data = {k: v for k, v in items.dict().items() if v is not None}
-            if update_data:
-                await User.update(user.id, **update_data)
-                return {"ok": True, "data": update_data}
-            else:
-                return {"ok": False, "message": "Nothing to update"}
+            await User.update(user.id, **update_data)
+            return {"ok": True, "data": update_data}
         else:
             raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
     else:

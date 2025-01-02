@@ -1,5 +1,3 @@
-import os
-
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
 from pydantic import BaseModel
@@ -69,15 +67,26 @@ async def list_category_shop(operator_id: int,
     shop = await Shop.get(shop_id)
     if user and product and category and shop:
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-            photo = os.path.exists(str(product.photo))
-            product = await ShopProduct.create(description=description, name=product.name, owner_id=operator_id,
-                                               category_id=shop_category_id,
-                                               discount_price=discount_price, restorator_price=0,
-                                               optom_price=0, one_price=one_price, photo=photo, shop_id=shop_id,
-                                               shtrix_code=shtrix_code)
+            if user.status.value == 'moderator' and one_price:
+                return Response("Moderator narx kiritolmaydi", status.HTTP_404_NOT_FOUND)
+
+            product = await ShopProduct.create(
+                description=description,
+                name=product.name,
+                owner_id=operator_id,
+                category_id=shop_category_id,
+                discount_price=discount_price,
+                restorator_price=0,
+                optom_price=0,
+                one_price=one_price,
+                shop_id=shop_id,
+                shtrix_code=shtrix_code
+            )
             return {"ok": True, "id": product.id}
+
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -93,8 +102,8 @@ async def list_category_shop(operator_id: int,
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and shop:
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-            await ShopProductPhoto.create(product_id=product_id, photo=photo)
-            return {"ok": True}
+            photo = await ShopProductPhoto.create(product_id=product_id, photo=photo)
+            return {"ok": True, "id": photo.id}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:

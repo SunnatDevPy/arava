@@ -2,10 +2,10 @@ from enum import Enum
 
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import Boolean, desc, select, func
+from sqlalchemy import Boolean, Integer
 from sqlalchemy import ForeignKey, BIGINT, BOOLEAN, Enum as SqlEnum
 from sqlalchemy import String
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy_file import ImageField
 
 from apps.models.database import BaseModel
@@ -77,6 +77,7 @@ class Order(BaseModel):
     payment_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('payments.id', ondelete="CASCADE"))
     payment_name: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder), nullable=True)
+    address: Mapped[str] = mapped_column(String, nullable=True)
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     last_first_name: Mapped[str] = mapped_column(String, nullable=True)
     phone: Mapped[str] = mapped_column(String)
@@ -95,5 +96,11 @@ class Payment(BaseModel):
     status: Mapped[bool] = mapped_column(Boolean)
     token: Mapped[str] = mapped_column(String, nullable=True)
 
+
 # class PromoCodes(BaseModel):
 #     code: Mapped[str] = mapped_column("")
+
+class ProjectAllStatus(BaseModel):
+    one_price_protsent: Mapped[int] = mapped_column(Integer)
+    optoms_price_protsent: Mapped[int] = mapped_column(Integer)
+    optom_price_protsent: Mapped[int] = mapped_column(Integer)

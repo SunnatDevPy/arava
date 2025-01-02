@@ -102,7 +102,7 @@ class ShopProduct(BaseModel):
     one_price: Mapped[int] = mapped_column(BigInteger)
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopProductCategory.id, ondelete='CASCADE'))
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     photos: Mapped['ShopProductPhoto'] = relationship("ShopProductPhoto", lazy="selectin", back_populates='product')
     shtrix_code: Mapped[int] = mapped_column(BigInteger, nullable=True)
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)

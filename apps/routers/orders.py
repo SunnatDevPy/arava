@@ -3,6 +3,7 @@ from fastapi import Response
 from starlette import status
 
 from apps.models import User, Shop, Cart, Order, OrderItem
+from apps.models.users import Payment
 from apps.utils.details import sum_from_shop, detail_orders
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
@@ -43,13 +44,20 @@ async def list_category_shop(user_id: int, shop_id: int):
 
 @order_router.post(path='', name="Create Order from User")
 async def list_category_shop(client_id: int,
-                             shop_id: int):
+                             shop_id: int,
+                             payment_id: int,
+                             first_last_name: str,
+                             phone: str,
+                             address):
     user = await User.get(client_id)
     shop = await Shop.get(shop_id)
-    if user and shop:
+    payment = await Payment.get(payment_id)
+    if user and shop and payment:
         carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
         sum_ = await sum_from_shop(shop_id, user)
-        order = await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id, total_sum=sum_[0])
+        order = await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id, total_sum=sum_[0],
+                                   payment_id=payment_id, payment_name=payment.name, address=address,
+                                   last_first_name=first_last_name, phone=phone)
         for i in carts:
             await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count, price_product=sum_[-1])
             await Cart.delete(i.id)
