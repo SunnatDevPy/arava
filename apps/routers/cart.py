@@ -62,8 +62,8 @@ async def list_category_shop(client_id: int,
         if cart:
             await Cart.update(cart.id, count=count + cart.count)
         else:
-            await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=shop_id)
-        return {"ok": True}
+            cart = await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=shop_id)
+        return {"ok": True, "cart": cart}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
