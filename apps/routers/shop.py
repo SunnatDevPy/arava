@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, Shop, ShopPhoto, WorkTimes
+from apps.models import User, Shop, ShopPhoto, WorkTimes, ShopCategory
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
@@ -39,6 +39,16 @@ class UpdateShopsModel(BaseModel):
 async def list_category_shop():
     shops = await Shop.all()
     return {"shops": shops, "work": await WorkTimes.all()}
+
+
+@shop_router.get(path='/search', name="search")
+async def list_category_shop(search: Optional[str] = None, main_category_id: Optional[int] = None):
+    category = await ShopCategory.get(main_category_id)
+    if category:
+        shops = await Shop.search_shops(search, main_category_id)
+    else:
+        shops = await Shop.search_shops(search)
+    return {"shops": shops}
 
 
 @shop_router.get(path='/detail', name="Get Shop")

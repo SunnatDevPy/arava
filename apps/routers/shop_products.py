@@ -1,10 +1,12 @@
+from typing import Optional
+
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
 from apps.models import ShopProductPhoto, ShopProduct, ShopProductCategory, User, Shop, PanelProduct
-from apps.utils.details import get_products_utils
+from apps.utils.details import get_products_utils, update_products
 
 shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
 
@@ -122,6 +124,16 @@ class PhotoModel(BaseModel):
 async def list_category_shop(product_id: int) -> list[PhotoModel]:
     products = await ShopProductPhoto.get_products_photos(product_id)
     return products
+
+
+@shop_product_router.get(path='/search', name="search")
+async def list_category_shop(search: Optional[str] = None, category_id: Optional[int] = None):
+    category = await ShopProductCategory.get(category_id)
+    if category:
+        products = await ShopProduct.search_shops(search, category_id)
+    else:
+        products = await ShopProduct.search_shops(search)
+    return {"products": await update_products(products)}
 
 
 # Update Shop

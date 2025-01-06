@@ -117,6 +117,7 @@ async def register_full_name(message: Message, state: FSMContext):
     if message.location:
         data = await state.get_data()
         await User.update(message.from_user.id, lat=message.location.latitude, long=message.location.longitude)
+        await message.answer("Xush kelibsiz", reply_markup=ReplyKeyboardRemove())
         await message.answer("Menu", reply_markup=menu(message.from_user.id, language=data.get('locale')))
         await asyncio.sleep(60)
         await message.delete()

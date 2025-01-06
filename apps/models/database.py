@@ -153,6 +153,13 @@ class AbstractClass:
     async def get_order_items(cls, order_id):
         return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
 
+    @classmethod
+    async def search_shops(cls, name, category_id=None):
+        if category_id:
+            return (await db.execute(select(cls).where(cls.category_id == category_id, cls.name.ilike(f"%{name}%")))).scalars().all()
+        else:
+            return (await db.execute(select(cls).filter(cls.name.ilike(f"%{name}%")))).scalars().all()
+
     # def run_async(self, func, *args, **kwargs):
     #     return asyncio.run(func(*args, **kwargs))
 

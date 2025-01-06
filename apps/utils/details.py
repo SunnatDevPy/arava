@@ -149,6 +149,7 @@ async def detail_orders(orders: list['Order']):
         detail_.append({"order": i, "order_items": items})
     return detail_
 
+
 # async def detail_orders_all_statuses(orders: list['Order']):
 #     detail_ = []
 #     for i in orders:
@@ -160,3 +161,42 @@ async def detail_orders(orders: list['Order']):
 #                           "total": j.price_product * j.count})
 #         detail_.append({"order": i, "order_items": items})
 #     return detail_
+
+
+async def update_products(products):
+    list_ = []
+    for i in products:
+        shop = await Shop.get(i.shop_id)
+        i.shop = shop
+        list_.append(i)
+    return list_
+
+
+# Оптимизация корзины
+def optimize_cart(shop_id):
+    # Фильтруем магазины, где есть все продукты из корзины
+    valid_stores = [
+        store for store in stores if all(product in store["цены"] for product in cart)
+    ]
+
+    if not valid_stores:
+        raise ValueError("Нет магазинов, где есть все продукты из корзины!")
+
+    # Находим минимальные цены для каждого продукта
+    optimized_cart = {}
+    total_cost = 0
+
+    for product, quantity in cart.items():
+        min_price = float("inf")
+        best_store = None
+
+        for store in valid_stores:
+            if product in store["цены"]:
+                if store["цены"][product] < min_price:
+                    min_price = store["цены"][product]
+                    best_store = store["название"]
+
+        optimized_cart[product] = {"цена": min_price, "количество": quantity, "магазин": best_store}
+        total_cost += min_price * quantity
+
+    return optimized_cart, total_cost
