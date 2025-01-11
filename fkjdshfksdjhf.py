@@ -22,35 +22,35 @@
 # url = 'https://bank.uz/uz/'
 # fetch_exchange_rates(url)
 
-import random
-
-# Призы и их вероятности (в процентах)
-prizes = [
-    {"name": "Меч", "chance": 40},  # 40% шанс
-    {"name": "Щит", "chance": 25},  # 25% шанс
-    {"name": "Кольцо", "chance": 20},  # 20% шанс
-    {"name": "Зелье здоровья", "chance": 10},  # 10% шанс
-    {"name": "Редкий артефакт", "chance": 5},  # 5% шанс
-]
-
-def open_chest():
-    # Создаем список диапазонов для вероятностей
-    ranges = []
-    current_range = 0
-    for prize in prizes:
-        ranges.append((current_range, current_range + prize["chance"], prize["name"]))
-        current_range += prize["chance"]
-
-    # Генерируем случайное число от 0 до 100
-    random_number = random.uniform(0, 100)
-
-    # Находим, в какой диапазон попало число
-    for start, end, name in ranges:
-        if start <= random_number < end:
-            return name
-
-# Открытие сундука
-if __name__ == "__main__":
-    print("Вы открыли сундук!")
-    reward = open_chest()
-    print(f"Ваш приз: {reward}")
+# import random
+#
+# # Призы и их вероятности (в процентах)
+# prizes = [
+#     {"name": "Меч", "chance": 40},  # 40% шанс
+#     {"name": "Щит", "chance": 25},  # 25% шанс
+#     {"name": "Кольцо", "chance": 20},  # 20% шанс
+#     {"name": "Зелье здоровья", "chance": 10},  # 10% шанс
+#     {"name": "Редкий артефакт", "chance": 5},  # 5% шанс
+# ]
+#
+# def open_chest():
+#     # Создаем список диапазонов для вероятностей
+#     ranges = []
+#     current_range = 0
+#     for prize in prizes:
+#         ranges.append((current_range, current_range + prize["chance"], prize["name"]))
+#         current_range += prize["chance"]
+#
+#     # Генерируем случайное число от 0 до 100
+#     random_number = random.uniform(0, 100)
+#
+#     # Находим, в какой диапазон попало число
+#     for start, end, name in ranges:
+#         if start <= random_number < end:
+#             return name
+#
+# # Открытие сундука
+# if __name__ == "__main__":
+#     print("Вы открыли сундук!")
+#     reward = open_chest()
+#     print(f"Ваш приз: {reward}")

@@ -34,6 +34,7 @@ class User(BaseModel):
     username: Mapped[str] = mapped_column(String(255))
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
+
     status: Mapped[str] = mapped_column(SqlEnum(StatusUser), nullable=True)
     type: Mapped[str] = mapped_column(SqlEnum(TypeUser), nullable=True)
     contact: Mapped[str] = mapped_column(nullable=True)
@@ -62,6 +63,7 @@ class Cart(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     count: Mapped[float] = mapped_column(nullable=True)
+    shtrix_code: Mapped[int] = mapped_column(BIGINT, nullable=True)
 
 
 class Order(BaseModel):

@@ -88,6 +88,13 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
+    async def get_from_username_and_id(cls, _id, user_name, *, relationship=None):
+        query = select(cls).where(cls.id == _id, cls.username == user_name)
+        if relationship:
+            query = query.options(selectinload(relationship))
+        return (await db.execute(query)).scalar()
+
+    @classmethod
     async def from_user(cls, _id, *, relationship=None):
         query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
         if relationship:
@@ -154,9 +161,14 @@ class AbstractClass:
         return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
 
     @classmethod
+    async def get_from_name(cls, name):
+        return (await db.execute(select(cls).where(cls.name == name))).scalars().all()
+
+    @classmethod
     async def search_shops(cls, name, category_id=None):
         if category_id:
-            return (await db.execute(select(cls).where(cls.category_id == category_id, cls.name.ilike(f"%{name}%")))).scalars().all()
+            return (await db.execute(
+                select(cls).where(cls.category_id == category_id, cls.name.ilike(f"%{name}%")))).scalars().all()
         else:
             return (await db.execute(select(cls).filter(cls.name.ilike(f"%{name}%")))).scalars().all()
 

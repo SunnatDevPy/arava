@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from apps.models import User, Shop, Cart
+from apps.models import User, Shop, Cart, PanelProduct
 from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
@@ -58,11 +58,13 @@ async def list_category_shop(client_id: int,
                              count: int = Form()):
     user = await User.get(client_id)
     cart = await Cart.get_cart_from_product(client_id, product_id)
+    product: PanelProduct = await PanelProduct.get(product_id)
     if user and product_id:
         if cart:
             await Cart.update(cart.id, count=count + cart.count)
         else:
-            cart = await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=shop_id)
+            cart = await Cart.create(user_id=user.id, product_id=product_id, count=count, shop_id=shop_id,
+                                     shtrix_code=product.shtrix_code)
         return {"ok": True, "cart": cart}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)

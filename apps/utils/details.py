@@ -131,10 +131,10 @@ async def get_carts_(user_id):
     return list_
 
 
-async def check_sum_shops_from_cart(shop_id, user):
-    carts: list['Cart'] = await Cart.get_cart_from_shop(user.id, shop_id)
-    sum_ = await sum_from_shop(shop_id, user)
-    shops = await Shop.all()
+# async def check_sum_shops_from_cart(shop_id, user):
+#     carts: list['Cart'] = await Cart.get_cart_from_shop(user.id, shop_id)
+#     sum_ = await sum_from_shop(shop_id, user)
+#     shops = await Shop.all()
 
 
 async def detail_orders(orders: list['Order']):
@@ -173,30 +173,27 @@ async def update_products(products):
 
 
 # Оптимизация корзины
-def optimize_cart(shop_id):
-    # Фильтруем магазины, где есть все продукты из корзины
-    valid_stores = [
-        store for store in stores if all(product in store["цены"] for product in cart)
-    ]
+async def get_cheapest_shops(user_id: int, shop_id: int):
+    shops: list['Shop'] = await Shop.all()
+    carts: list['Cart'] = await Cart.get_cart_from_shop(user_id, shop_id)
+    shop_totals = []
 
-    if not valid_stores:
-        raise ValueError("Нет магазинов, где есть все продукты из корзины!")
+    for shop in shops:
+        total_cost = 0
+        all_products_available = True
 
-    # Находим минимальные цены для каждого продукта
-    optimized_cart = {}
-    total_cost = 0
+        for cart_item in carts:
+            product = await ShopProduct.get_products_from_shop2(shop.id, cart_item.shtrix_code)
 
-    for product, quantity in cart.items():
-        min_price = float("inf")
-        best_store = None
+            if not product:
+                all_products_available = False
+                break
 
-        for store in valid_stores:
-            if product in store["цены"]:
-                if store["цены"][product] < min_price:
-                    min_price = store["цены"][product]
-                    best_store = store["название"]
+            price = product.discount_price or product.one_price
+            total_cost += price * cart_item.count
 
-        optimized_cart[product] = {"цена": min_price, "количество": quantity, "магазин": best_store}
-        total_cost += min_price * quantity
+        if all_products_available:
+            shop_totals.append({"shop": shop, "total_cost": total_cost})
 
-    return optimized_cart, total_cost
+    sorted_shops = sorted(shop_totals, key=lambda x: x["total_cost"])[:3]
+    return sorted_shops

@@ -2,6 +2,9 @@ from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
+from apps.models.users import MyAddress
+from apps.routers import geolocator
+
 
 def language_inl():
     ikb = InlineKeyboardBuilder()
@@ -19,10 +22,18 @@ def confirm_register_inl():
     return ikb.as_markup()
 
 
+async def my_address(address, user_id):
+    ikb = InlineKeyboardBuilder()
+    ikb.add(*[InlineKeyboardButton(text=i.name, callback_data=f'address_{user_id}_{i.lat}_{i.long}_{i.id}') for i in
+              address])
+    ikb.adjust(1, repeat=True)
+    return ikb.as_markup()
+
+
 def main_menu():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🍽Menu🍽", callback_data="menu"),
-              InlineKeyboardButton(text="🏠Mening manzillarim🏠", callback_data="menu")])
+              InlineKeyboardButton(text="Admin Panel", callback_data="admin")])
     return ikb.as_markup()
 
 

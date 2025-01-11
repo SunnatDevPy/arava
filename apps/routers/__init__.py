@@ -1,3 +1,4 @@
+from apps.routers.geopy_project import geolocator
 from apps.routers.main_photos import main_photos_router
 from apps.routers.panel_products import panel_product_router
 from apps.routers.main_category import category_router

@@ -117,6 +117,16 @@ class ShopProduct(BaseModel):
         query = select(cls).filter(cls.category_id == category_id)
         return (await db.execute(query)).scalars().all()
 
+    @classmethod
+    async def get_products_from_shop(cls, shop_id):
+        query = select(cls).filter(cls.shop_id == shop_id)
+        return (await db.execute(query)).scalars().all()
+
+    @classmethod
+    async def get_products_from_shop2(cls, shop_id, shtrix_code):
+        query = select(cls).filter(cls.shop_id == shop_id, cls.shtrix_code == shtrix_code)
+        return (await db.execute(query)).scalars().all()
+
 
 class ShopProductPhoto(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_products.id', ondelete='CASCADE'))

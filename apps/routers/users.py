@@ -6,6 +6,8 @@ from fastapi import APIRouter, HTTPException, Form
 from pydantic import BaseModel
 
 from apps.models import User, Shop
+from apps.models.users import MyAddress
+from apps.routers import geolocator
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -113,6 +115,14 @@ async def user_patch_update(operator_id: int, items: Annotated[UserUpdate, Form(
     user = await User.get(operator_id)
     if user and operator_id:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
+        if items.long and items.lat:
+            location = geolocator.reverse(f"{items.lat}, {items.long}")
+            address = location.raw['address']
+            name = f"{address['county']}, {address['neighbourhood']}, {address['road']}"
+            check_address = await MyAddress.get_from_name(name)
+            if check_address == None:
+                await MyAddress.create(user_id=operator_id, lat=items.lat, long=items.long,
+                                       name=f"{address['county']}, {address['neighbourhood']}, {address['road']}")
         if update_data:
             await User.update(user.id, **update_data)
             return {"ok": True, "data": update_data}
@@ -150,3 +160,9 @@ async def user_delete(operator_id: int, user_id: int):
             raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
     else:
         raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.get(path='/login', name="Login")
+async def list_category_shop(username: str, password: int):
+    user = await User.get_from_username_and_id(password, username)
+    return {"user": user}
