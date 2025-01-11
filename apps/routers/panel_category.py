@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Annotated
 
 from fastapi import APIRouter, Form
 from fastapi import Response
@@ -13,7 +13,7 @@ panel_category_router = APIRouter(prefix='/panel-category', tags=['Admin Panel C
 
 class ListCategories(BaseModel):
     id: int
-    name: str
+    name: Optional[str] = None
     parent_id: Optional[int] = None
     icon_name: Optional[str] = None
 
@@ -24,19 +24,19 @@ async def list_category_shop() -> list[ListCategories]:
     return categories
 
 
-@panel_category_router.post(path='/', name="Create Panel Category")
-async def list_category_shop(moderator_id: int,
+@panel_category_router.post(path='', name="Create Panel Category")
+async def list_category_shop(operator_id: int,
                              name: str = Form(),
                              parent_id: int = Form(default=None),
                              icon_name: str = Form(default=None),
                              ):
-    seller = await User.get(moderator_id)
+    seller = await User.get(operator_id)
     if seller:
         if seller.status.value in ['moderator', "admin", "superuser"]:
             if parent_id == 0:
                 parent_id = None
-            await PanelCategory.create(name=name, parent_id=parent_id, icon_name=icon_name)
-            return {"ok": True}
+            panel_category = await PanelCategory.create(name=name, parent_id=parent_id, icon_name=icon_name)
+            return {"ok": True, "panel_category": panel_category}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
@@ -44,22 +44,15 @@ async def list_category_shop(moderator_id: int,
 
 
 # # Update Category
-@panel_category_router.patch(path='/', name="Update Panel Category")
-async def list_category_shop(moderator_id: int,
-                             category_id: int,
-                             name: str = Form(default=None),
-                             parent_id: int = Form(default=None),
-                             icon_name: str = Form(default=None),
-                             ):
+@panel_category_router.patch(path='', name="Update Panel Category")
+async def list_category_shop(moderator_id: int, items: Annotated[ListCategories, Form()]):
     user = await User.get(moderator_id)
     if user:
-        update_data = {k: v for k, v in
-                       {"name": name, "parent_id": parent_id, "icon_name": icon_name} if
-                       v is not None}
+        update_data = {k: v for k, v in items.dict().items() if v is not None}
         if user.status.value in ['moderator', "admin", "superuser"]:
-            shop = await PanelCategory.get(category_id)
-            if shop:
-                await PanelCategory.update(category_id, **update_data)
+            category = await PanelCategory.get(items.id)
+            if category:
+                await PanelCategory.update(items.id, **update_data)
                 return {"ok": True}
             else:
                 return Response("Bunday sho'p id yo'q", status.HTTP_404_NOT_FOUND)
@@ -69,7 +62,7 @@ async def list_category_shop(moderator_id: int,
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@panel_category_router.delete(path='/', name="Delete Category")
+@panel_category_router.delete(path='', name="Delete Category")
 async def list_category_shop(category_id: int, operator_id: int):
     user = await User.get(operator_id)
     if user:
