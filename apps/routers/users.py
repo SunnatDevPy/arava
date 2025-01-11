@@ -165,4 +165,7 @@ async def user_delete(operator_id: int, user_id: int):
 @user_router.get(path='/login', name="Login")
 async def list_category_shop(username: str, password: int):
     user = await User.get_from_username_and_id(password, username)
-    return {"user": user}
+    if user.status.value != "user":
+        return {"user": user}
+    else:
+        raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")

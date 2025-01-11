@@ -12,6 +12,7 @@ shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categori
 
 class ListCategories(BaseModel):
     id: int
+    name: str
     shop_id: int
     parent_id: Optional[int] = None
     icon_name: Optional[str] = None
