@@ -140,7 +140,12 @@ async def user_add(operator_id: int, user_id: int, items: Annotated[UserUpdateSt
         if operator.status.value in ['moderator', "admin", "superuser"]:
             if operator.status.value == "moderator" and items.status:
                 raise HTTPException(status_code=404, detail="Moderator status o'zgartirolmaydi faqatgina typle larni")
+            if items.status == 'string' or items.status == '':
+                items.status = None
+            if items.type == 'string' or items.type == '':
+                items.type = None
             update_data = {k: v for k, v in items.dict().items() if v is not None}
+
             await User.update(user.id, **update_data)
             return {"ok": True, "data": update_data}
         else:
