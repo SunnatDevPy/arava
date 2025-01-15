@@ -24,7 +24,15 @@ def confirm_register_inl():
 
 async def my_address(address, user_id):
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text=i.name, callback_data=f'address_{user_id}_{i.lat}_{i.long}_{i.id}') for i in
+    ikb.add(*[InlineKeyboardButton(text=i.address, callback_data=f'address_{user_id}_{i.lat}_{i.long}_{i.id}') for i in
+              address])
+    ikb.adjust(1, repeat=True)
+    return ikb.as_markup()
+
+
+async def my_restorator(address, user_id):
+    ikb = InlineKeyboardBuilder()
+    ikb.add(*[InlineKeyboardButton(text=i.address, callback_data=f'address_{user_id}_{i.lat}_{i.long}_{i.id}') for i in
               address])
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()

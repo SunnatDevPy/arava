@@ -2,13 +2,13 @@ from enum import Enum
 
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import Boolean, Integer
+from sqlalchemy import Boolean, Integer, select, desc
 from sqlalchemy import ForeignKey, BIGINT, BOOLEAN, Enum as SqlEnum
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy_file import ImageField
 
-from apps.models.database import BaseModel
+from apps.models.database import BaseModel, db
 
 
 class MainPhoto(BaseModel):
@@ -27,7 +27,7 @@ class User(BaseModel):
     class TypeUser(str, Enum):
         OPTOM = 'optom'
         RESTORATOR = 'restorator'
-        ONE = 'one'
+        ONE = "one"
 
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)
@@ -46,14 +46,30 @@ class User(BaseModel):
 
 class MyRestaurant(BaseModel):
     user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'))
-    name: Mapped[str] = mapped_column(String, nullable=True)
+    type: Mapped[str] = mapped_column(nullable=True)
+    office_name: Mapped[str] = mapped_column(String, nullable=True)
+    address: Mapped[str]
+    bank_name: Mapped[str]
+    xisob_raqami: Mapped[str]
+    inn: Mapped[str]
+    ndc: Mapped[str] = mapped_column(nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
+
+    @classmethod
+    async def get_restaurants(cls):
+        query = select(cls).order_by(desc(cls.id)).where(cls.type == "restorator")
+        return (await db.execute(query)).scalars().all()
+
+    @classmethod
+    async def get_optom(cls):
+        query = select(cls).order_by(desc(cls.id)).where(cls.type == "optom")
+        return (await db.execute(query)).scalars().all()
 
 
 class MyAddress(BaseModel):
     user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'))
-    name: Mapped[str] = mapped_column(String, nullable=True)
+    address: Mapped[str] = mapped_column(String, nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
 
@@ -83,6 +99,7 @@ class Order(BaseModel):
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     last_first_name: Mapped[str] = mapped_column(String, nullable=True)
     phone: Mapped[str] = mapped_column(String)
+    driver_price: Mapped[int] = mapped_column(BIGINT)
     total_sum: Mapped[int] = mapped_column(BIGINT, nullable=True)
 
 

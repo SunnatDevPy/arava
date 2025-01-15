@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from apps.models import User, Shop
 from apps.models.users import MyAddress
 from apps.routers import geolocator
+from dispatcher import bot
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -122,7 +123,7 @@ async def user_patch_update(operator_id: int, items: Annotated[UserUpdate, Form(
             check_address = await MyAddress.get_from_name(name)
             if check_address == None:
                 await MyAddress.create(user_id=operator_id, lat=items.lat, long=items.long,
-                                       name=f"{address['county']}, {address['neighbourhood']}, {address['road']}")
+                                       address=f"{address['county']}, {address['neighbourhood']}, {address['road']}")
         if update_data:
             await User.update(user.id, **update_data)
             return {"ok": True, "data": update_data}
@@ -147,6 +148,16 @@ async def user_add(operator_id: int, user_id: int, items: Annotated[UserUpdateSt
             update_data = {k: v for k, v in items.dict().items() if v is not None}
 
             await User.update(user.id, **update_data)
+            if items.status:
+                if user.status.value == 'admin':
+                    bot.send_message(user_id, "Assalomu aleykum status admingaga o'zgartirildi")
+                elif user.status.value == "moderator":
+                    bot.send_message(user_id, "Assalomu aleykum status moderatorga o'zgartirildi")
+            elif items.type:
+                if user.type.value == 'restorator':
+                    bot.send_message(user_id, "Assalomu aleykum status restoratorga o'zgartirildi")
+                elif user.type.value == "optom":
+                    bot.send_message(user_id, "Assalomu aleykum status optomchiga o'zgartirildi")
             return {"ok": True, "data": update_data}
         else:
             raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")

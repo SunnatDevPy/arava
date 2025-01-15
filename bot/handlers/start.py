@@ -8,7 +8,8 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from apps.models import User
 from apps.models.users import MyAddress
 from apps.routers import geolocator
-from bot.buttuns.inline import main_menu, language_inl, get_location, confirm_register_inl, menu, my_address
+from bot.buttuns.inline import main_menu, language_inl, get_location, confirm_register_inl, menu, my_address, \
+    my_restorator
 from bot.state.states import Contact, Location
 
 start_router = Router()
@@ -111,11 +112,16 @@ async def register_full_name(call: CallbackQuery, state: FSMContext):
 @start_router.callback_query(F.data == 'menu')
 async def register_full_name(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
+    user = await User.get(call.from_user.id)
     address = await MyAddress.get_cart_from_user(call.from_user.id)
     await call.message.answer("Mahsulotni qayerga jo'natish uchun locatsiya kiriting!", reply_markup=get_location())
     if address:
-        await call.message.answer("Yoki eski manzillaringizni tanlang",
+        await call.message.answer("Manzillaringizni tanlang",
                                   reply_markup=await my_address(address, call.from_user.id))
+    if user.type.value != "one":
+        address = await MyAddress.from_user(user.id)
+        await call.message.answer("Idorangizni tanlang",
+                                  reply_markup=await my_restorator(address, call.from_user.id))
 
 
 @start_router.message(F.location)
@@ -128,7 +134,7 @@ async def register_full_name(message: Message, state: FSMContext):
         check_address = await MyAddress.get_from_name(name)
         if check_address == None:
             await MyAddress.create(user_id=message.from_user.id, lat=data.get('lat'), long=data.get('long'),
-                                   name=name)
+                                   address=name)
         await User.update(message.from_user.id, lat=message.location.latitude, long=message.location.longitude)
         await message.answer("Xush kelibsiz", reply_markup=ReplyKeyboardRemove())
         messages: Message = await message.answer("Menu",

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from fastapi import Response
+from geopy.distance import geodesic
 from starlette import status
 
 from apps.models import User, Shop, Cart, Order, OrderItem
@@ -54,10 +55,13 @@ async def list_category_shop(client_id: int,
     payment = await Payment.get(payment_id)
     if user and shop and payment:
         carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
+        distance_km = geodesic((shop.lat, shop.long), (user.lat, user.long)).kilometers
+
         sum_ = await sum_from_shop(shop_id, user)
         order = await Order.create(user_id=client_id, payment=False, status="NEW", shop_id=shop_id, total_sum=sum_[0],
                                    payment_id=payment_id, payment_name=payment.name, address=address,
-                                   last_first_name=first_last_name, phone=phone)
+                                   last_first_name=first_last_name, phone=phone,
+                                   driver_price=0 if sum_[0] > 1500000 else 50000 * distance_km)
         order_items = []
         for i in carts:
             s = await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count,

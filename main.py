@@ -74,38 +74,38 @@ app.add_middleware(
 #     return RedirectResponse(request.url_for('login_page'))
 #
 
-@app.get("/banner", name="Banner photos")
-async def list_photo_banner():
-    #     # list_ = []
-    #     # image_path = os.listdir('media/banner')
-    #     # if not image_path:
-    #     #     return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
-    #     # for i in image_path:
-    #     #     file_path = 'media/banners/' + i
-    #     #     if i.endswith('png'):
-    #     #         type = 'png'
-    #     #     else:
-    #     #         type = 'jpeg'
-    #     #     list_.append(FileResponse(file_path, media_type=f"image/{type}", filename=i))
-    #     # return {"banner": list_}
-    #     file_path = os.path.join("media/banner", "Pasted_image.png")
-    #     if not os.path.exists(file_path):
-    #         return {"error": "File not found"}
-    #     return FileResponse(file_path, media_type="image/jpeg")
-    banner_dir = 'media/banners'
-
-    if not os.path.exists(banner_dir):
-        raise HTTPException(status_code=404, detail="Banner directory not found")
-
-    image_files = [f for f in os.listdir(banner_dir) if
-                   os.path.isfile(os.path.join(banner_dir, f)) and f.endswith(('.png', '.jpeg', '.jpg'))]
-
-    if not image_files:
-        raise HTTPException(status_code=404, detail="No images found in the banner directory")
-
-    banner_urls = [{"filename": f, "url": f"/media/banners/{f}"} for f in image_files]
-
-    return JSONResponse(content={"banners": banner_urls}, status_code=200)
+# @app.get("/banner", name="Banner photos")
+# async def list_photo_banner():
+#     #     # list_ = []
+#     #     # image_path = os.listdir('media/banner')
+#     #     # if not image_path:
+#     #     #     return Response("Image not found on the server", status.HTTP_404_NOT_FOUND)
+#     #     # for i in image_path:
+#     #     #     file_path = 'media/banners/' + i
+#     #     #     if i.endswith('png'):
+#     #     #         type = 'png'
+#     #     #     else:
+#     #     #         type = 'jpeg'
+#     #     #     list_.append(FileResponse(file_path, media_type=f"image/{type}", filename=i))
+#     #     # return {"banner": list_}
+#     #     file_path = os.path.join("media/banner", "Pasted_image.png")
+#     #     if not os.path.exists(file_path):
+#     #         return {"error": "File not found"}
+#     #     return FileResponse(file_path, media_type="image/jpeg")
+#     banner_dir = 'media/banners'
+#
+#     if not os.path.exists(banner_dir):
+#         raise HTTPException(status_code=404, detail="Banner directory not found")
+#
+#     image_files = [f for f in os.listdir(banner_dir) if
+#                    os.path.isfile(os.path.join(banner_dir, f)) and f.endswith(('.png', '.jpeg', '.jpg'))]
+#
+#     if not image_files:
+#         raise HTTPException(status_code=404, detail="No images found in the banner directory")
+#
+#     banner_urls = [{"filename": f, "url": f"/media/banners/{f}"} for f in image_files]
+#
+#     return JSONResponse(content={"banners": banner_urls}, status_code=200)
 
 # @app.get(path='/photo-all/', name="Get Shop Photos all")
 # async def list_category_shop():
