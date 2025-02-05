@@ -2,8 +2,8 @@ from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from apps.models import User, Shop, Cart, PanelProduct
-from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_
+from apps.models import BotUser, Shop, Cart, PanelProduct
+from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_, get_cheapest_shops
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 
@@ -25,7 +25,7 @@ async def list_category_shop(cart_id: int):
 
 @cart_router.get(path='/sum', name="Get Cart Sum User")
 async def list_category_shop(user_id: int, shop_id: int):
-    user = await User.get(user_id)
+    user = await BotUser.get(user_id)
     shop = await Shop.get(shop_id)
     if shop and user:
         sum_ = await sum_from_shop(shop_id, user)
@@ -43,12 +43,13 @@ async def list_category_shop(user_id: int):
 @cart_router.get(path='/from-user-shop', name="Get Cart in Shop")
 async def list_category_shop(user_id: int, shop_id: int):
     carts = await detail_cart(shop_id, user_id)
-    return {'carts': carts, "shops": await get_shops_unique_cart(carts)}
+    return {'carts': carts, "shops": await get_shops_unique_cart(carts),
+            "optimal_price": await get_cheapest_shops(user_id, shop_id)}
 
 
 @cart_router.get(path='/by_user', name="Get Cart in Shop")
 async def list_category_shop(user_id: int):
-    return {"shops": await get_carts_(user_id)}
+    return await get_carts_(user_id)
 
 
 @cart_router.post(path='', name="Create Cart from User")
@@ -56,7 +57,7 @@ async def list_category_shop(client_id: int,
                              product_id: int = Form(),
                              shop_id: int = Form(),
                              count: int = Form()):
-    user = await User.get(client_id)
+    user = await BotUser.get(client_id)
     cart = await Cart.get_cart_from_product(client_id, product_id)
     product: PanelProduct = await PanelProduct.get(product_id)
     if user and product_id:

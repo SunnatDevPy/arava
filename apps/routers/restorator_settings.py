@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from apps.models import User, Shop, Cart, PanelProduct
+from apps.models import AdminPanelUser, BotUser, Shop, Cart, PanelProduct
 from apps.models.users import MyRestaurant
 from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_
 
@@ -47,8 +47,8 @@ async def list_category_shop(moderator_id: int,
                              lat: float = Form(),
                              long: float = Form()
                              ):
-    moderator = await User.get(moderator_id)
-    user = await User.get(user_id)
+    moderator = await AdminPanelUser.get(moderator_id)
+    user = await BotUser.get(user_id)
     if user and moderator:
         restaurant = await MyRestaurant.create(user_id=user.id, type=user.type.value, address=address,
                                                bank_name=bank_name,
@@ -69,7 +69,7 @@ async def list_category_shop(moderator_id: int,
                              ndc: str = Form(default=None),
                              lat: float = Form(),
                              long: float = Form()):
-    moderator = await User.get(moderator_id)
+    moderator = await AdminPanelUser.get(moderator_id)
     restorator = await MyRestaurant.get(restorator_id)
     if restorator and moderator:
         update_data = {k: v for k, v in
@@ -91,7 +91,7 @@ async def list_category_shop(moderator_id: int,
 
 @cart_router.delete("/delete", name="Delete Restaurant or Optom")
 async def user_delete(moderator_id: int, restorator_id: int):
-    moderator = await User.get(moderator_id)
+    moderator = await AdminPanelUser.get(moderator_id)
     restorator = await MyRestaurant.get(restorator_id)
     if restorator and moderator:
         if moderator.status.value in ['moderator', "admin", "superuser"] or moderator.id == restorator.user_id:

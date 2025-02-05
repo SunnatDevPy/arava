@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, Shop, Cart, WorkTimes
+from apps.models import AdminPanelUser, Shop, Cart, WorkTimes
 from apps.utils.details import sum_from_shop, get_shops_unique_cart, detail_cart, get_carts_
 
 work_router = APIRouter(prefix='/work', tags=['Work Shop'])
@@ -37,7 +37,7 @@ async def list_category_shop(client_id: int,
                              open_time: str = Form(),
                              close_time: str = Form(),
                              weeks: list = Form()):
-    user = await User.get(client_id)
+    user = await AdminPanelUser.get(client_id)
     shop = await Shop.get(shop_id)
     if user and shop:
         await WorkTimes.create(shop_id=shop_id, open_time=open_time, close_time=close_time, weeks=weeks)
@@ -55,7 +55,7 @@ class UpdateWork(BaseModel):
 @work_router.patch(path='', name="Update Work")
 async def list_category_shop(user_id: int, shop_id: int, work_id: int, items: Annotated[UpdateWork, Form()]):
     work = await WorkTimes.get(work_id)
-    user = await User.get(user_id)
+    user = await AdminPanelUser.get(user_id)
     shop = await Shop.get(shop_id)
     if user.status.value in ["moderator", "admin", "superuser"] or user_id == shop.owner_id:
         if work:

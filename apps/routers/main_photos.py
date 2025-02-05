@@ -4,7 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Form
 from fastapi import Response
 from starlette import status
 import os
-from apps.models import MainPhoto, User
+from apps.models import MainPhoto, AdminPanelUser
 
 main_photos_router = APIRouter(prefix='/banners', tags=['Banners'])
 
@@ -22,7 +22,7 @@ async def list_category_shop():
 
 @main_photos_router.post(path='', name="Create Banner Photo")
 async def list_category_shop(operator_id: int, photo: UploadFile = File()):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
@@ -37,7 +37,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File()):
 
 @main_photos_router.patch(path='/update', name="Update Banner photo")
 async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo_id: int = Form()):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
@@ -55,7 +55,7 @@ async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo
 
 @main_photos_router.delete(path='/', name="Delete Banner photo")
 async def list_category_shop(operator_id: int, photo_id: int = Form()):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
             if await MainPhoto.get(photo_id):

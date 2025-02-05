@@ -88,15 +88,15 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
-    async def get_from_username_and_id(cls, _id, user_name, *, relationship=None):
-        query = select(cls).where(cls.id == _id, cls.username == user_name)
+    async def get_from_username_and_password(cls, password, user_name, *, relationship=None):
+        query = select(cls).where(cls.password == password, cls.username == user_name)
         if relationship:
             query = query.options(selectinload(relationship))
         return (await db.execute(query)).scalar()
 
     @classmethod
     async def from_user(cls, _id, *, relationship=None):
-        query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
+        query = select(cls).where(cls.bot_user_id == _id).order_by(desc(cls.id))
         if relationship:
             query = query.options(selectinload(relationship))
         return (await db.execute(query)).scalars()
@@ -142,7 +142,7 @@ class AbstractClass:
 
     @classmethod
     async def get_cart_from_shop(cls, user_id, shop_id):
-        return (await db.execute(select(cls).where(cls.user_id == user_id, cls.shop_id == shop_id))).scalars().all()
+        return (await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.shop_id == shop_id))).scalars().all()
 
     @classmethod
     async def from_shop(cls, shop_id):
@@ -150,19 +150,19 @@ class AbstractClass:
 
     @classmethod
     async def get_cart_from_product(cls, user_id, product_id):
-        return (await db.execute(select(cls).where(cls.user_id == user_id, cls.product_id == product_id))).scalar()
+        return (await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.product_id == product_id))).scalar()
 
     @classmethod
     async def get_cart_from_user(cls, user_id):
-        return (await db.execute(select(cls).where(cls.user_id == user_id))).scalars().all()
+        return (await db.execute(select(cls).where(cls.bot_user_id == user_id))).scalars().all()
 
     @classmethod
     async def get_order_items(cls, order_id):
         return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
 
     @classmethod
-    async def get_from_name(cls, name):
-        return (await db.execute(select(cls).where(cls.name == name))).scalars().all()
+    async def get_from_name(cls, address):
+        return (await db.execute(select(cls).where(cls.address == address))).scalars().all()
 
     @classmethod
     async def search_shops(cls, name, category_id=None):

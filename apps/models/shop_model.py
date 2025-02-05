@@ -9,7 +9,7 @@ from sqlalchemy_file import ImageField
 from apps.models.database import BaseModel, db
 
 
-class ShopCategory(BaseModel):
+class MainCategory(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
     icon_name: Mapped[str] = mapped_column(nullable=True)
 
@@ -20,8 +20,8 @@ class Shop(BaseModel):
         CLOSE = 'close'
 
     name: Mapped[str] = mapped_column(VARCHAR(255))
-    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
-    shop_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'), nullable=True)
+    main_category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(MainCategory.id, ondelete='CASCADE'))
     work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
@@ -42,7 +42,7 @@ class Shop(BaseModel):
 
     @classmethod
     async def get_shops_category(cls, id_):
-        query = select(cls).select_from(Shop).filter(cls.shop_category_id == id_).order_by(desc(cls.id))
+        query = select(cls).select_from(Shop).filter(cls.main_category_id == id_).order_by(desc(cls.id))
         return (await db.execute(query)).scalars().all()
 
 

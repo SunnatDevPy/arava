@@ -51,7 +51,7 @@ class PanelCategory(BaseModel):
 
 class PanelProduct(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
-    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(PanelCategory.id, ondelete='CASCADE'))
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
     shtrix_code: Mapped[int] = mapped_column(BigInteger, nullable=True)
@@ -79,11 +79,10 @@ class PanelProductPhoto(BaseModel):
         return (await db.execute(query)).scalars().all()
 
 
-class ShopProductCategory(BaseModel):
+class ShopCategory(BaseModel):
     name: Mapped[str] = mapped_column(VARCHAR(255))
-    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'),
-                                         nullable=True)
-    parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_product_categories.id', ondelete='CASCADE'),
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
+    parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_categories.id', ondelete='CASCADE'),
                                            nullable=True)
     icon_name: Mapped[str] = mapped_column(nullable=True)
 
@@ -105,8 +104,8 @@ class ShopProduct(BaseModel):
     optom_price: Mapped[int] = mapped_column(BigInteger, nullable=True)
     restorator_price: Mapped[int] = mapped_column(BigInteger, nullable=True)
     one_price: Mapped[int] = mapped_column(BigInteger)
-    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'))
-    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopProductCategory.id, ondelete='CASCADE'))
+    owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'))
+    category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     photos: Mapped['ShopProductPhoto'] = relationship("ShopProductPhoto", lazy="selectin", back_populates='product')
     shtrix_code: Mapped[int] = mapped_column(BigInteger, nullable=True)
@@ -125,7 +124,7 @@ class ShopProduct(BaseModel):
     @classmethod
     async def get_products_from_shop2(cls, shop_id, shtrix_code):
         query = select(cls).filter(cls.shop_id == shop_id, cls.shtrix_code == shtrix_code)
-        return (await db.execute(query)).scalars().all()
+        return (await db.execute(query)).scalar()
 
 
 class ShopProductPhoto(BaseModel):

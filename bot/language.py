@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, ReplyKeyboardRemove
 from bot.buttuns.inline import main_menu, contact
 from bot.state.states import Contact
-from apps.models import User
+from apps.models import BotUser
 
 language_router = Router()
 
@@ -25,7 +25,7 @@ async def language_handler(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
     await state.update_data(locale=lang_code)
     await call.answer(til, show_alert=True)
-    user = await User.get(call.from_user.id)
+    user = await BotUser.get(call.from_user.id)
     if not user:
         await state.set_state(Contact.phone)
         await call.message.answer(

@@ -3,9 +3,10 @@ from fastapi import Response
 from geopy.distance import geodesic
 from starlette import status
 
-from apps.models import User, Shop, Cart, Order, OrderItem
+from apps.models import BotUser, Shop, Cart, Order, OrderItem
 from apps.models.users import Payment
-from apps.utils.details import sum_from_shop, detail_orders
+from apps.utils.details import sum_from_shop, detail_orders, detail_order
+from dispatcher import bot
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
@@ -50,7 +51,7 @@ async def list_category_shop(client_id: int,
                              first_last_name: str,
                              phone: str,
                              address):
-    user = await User.get(client_id)
+    user = await BotUser.get(client_id)
     shop = await Shop.get(shop_id)
     payment = await Payment.get(payment_id)
     if user and shop and payment:
@@ -68,6 +69,10 @@ async def list_category_shop(client_id: int,
                                        price_product=sum_[-1])
             order_items.append(s)
             await Cart.delete(i.id)
+        try:
+            await bot.send_message(shop.group_id, await detail_order(order), parse_mode="HTML")
+        except:
+            await bot.send_message(user.id, await detail_order(order), parse_mode="HTML")
         return {"ok": True, "message": "Buyurtma qabul qilindi va guruxga yuborildi ", "order": order,
                 "order_items": order_items}
     else:

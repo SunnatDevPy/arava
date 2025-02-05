@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, Shop, WorkTimes, Payment
+from apps.models import AdminPanelUser, Shop, WorkTimes, Payment
 
 payment_router = APIRouter(prefix='/payment', tags=['Payment Shop'])
 
@@ -30,7 +30,7 @@ async def list_category_shop(admin_id: int,
                              name: str = Form(),
                              status_: bool = Form(default=False),
                              token: str = Form()):
-    user = await User.get(admin_id)
+    user = await AdminPanelUser.get(admin_id)
     if user:
         if user.status.value in ["admin", "superuser"]:
             await Payment.create(name=name, status=status_, token=token)
@@ -49,7 +49,7 @@ class UpdatePayment(BaseModel):
 
 @payment_router.patch(path='', name="Update Payment")
 async def list_category_shop(admin_id: int, payment_id: int, items: Annotated[UpdatePayment, Form()]):
-    user = await User.get(admin_id)
+    user = await AdminPanelUser.get(admin_id)
     payment = await Payment.get(payment_id)
     if user and payment:
         if user.status.value in ["admin", "superuser"]:
@@ -67,7 +67,7 @@ async def list_category_shop(admin_id: int, payment_id: int, items: Annotated[Up
 
 @payment_router.delete("", name="Delete Payment")
 async def user_delete(operator_id: int, payment_id):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         if user.status.value in ["admin", "superuser"]:
             await Payment.delete(payment_id)

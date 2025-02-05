@@ -49,7 +49,7 @@ def menu(user_id, language='uz', admin=False):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🛒ARAVA🛒",
                                    web_app=WebAppInfo(
-                                       url=f'https://arava1.vercel.app/#/{user_id}/{language}/'))])
+                                       url=f'http://localhost:8001/#/{user_id}/{language}/'))])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
     ikb.adjust(1, 2)

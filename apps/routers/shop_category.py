@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, ShopProductCategory, Shop
+from apps.models import AdminPanelUser, ShopCategory, Shop
 
 shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categories'])
 
@@ -20,7 +20,7 @@ class ListCategories(BaseModel):
 
 @shop_category_router.get(path='', name="Categories")
 async def list_category_shop() -> list[ListCategories]:
-    categories = await ShopProductCategory.all()
+    categories = await ShopCategory.all()
     return categories
 
 
@@ -28,7 +28,7 @@ async def list_category_shop() -> list[ListCategories]:
 async def list_category_shop(shop_id: int):
     shop = await Shop.get(shop_id)
     if shop:
-        category = await ShopProductCategory.get_shop_categories(shop_id)
+        category = await ShopCategory.get_shop_categories(shop_id)
         return category
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
@@ -41,13 +41,13 @@ async def list_category_shop(seller_id: int,
                              parent_id: int = Form(default=None),
                              icon_name: str = Form(default=None),
                              ):
-    seller = await User.get(seller_id)
+    seller = await AdminPanelUser.get(seller_id)
     shop = await Shop.get(shop_id)
     if seller and shop:
         if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin", "superuser"]:
             if parent_id == 0:
                 parent_id = None
-            categ = await ShopProductCategory.create(name=name, shop_id=shop_id, parent_id=parent_id,
+            categ = await ShopCategory.create(name=name, shop_id=shop_id, parent_id=parent_id,
                                                      icon_name=icon_name)
             return {"ok": True, "id": categ.id}
         else:
@@ -64,15 +64,15 @@ async def list_category_shop(operator_id: int,
                              parent_id: int = Form(default=None),
                              icon_name: str = Form(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         update_data = {k: v for k, v in
                        {"name": name, "parent_id": parent_id, "icon_name": icon_name} if
                        v is not None}
         if user.status.value in ['moderator', "admin", "superuser"]:
-            shop = await ShopProductCategory.get(category_id)
+            shop = await ShopCategory.get(category_id)
             if shop:
-                await ShopProductCategory.update(category_id, **update_data)
+                await ShopCategory.update(category_id, **update_data)
                 return {"ok": True}
             else:
                 return Response("Bunday sho'p id yo'q", status.HTTP_404_NOT_FOUND)
@@ -84,12 +84,12 @@ async def list_category_shop(operator_id: int,
 
 @shop_category_router.delete(path='/', name="Delete Category")
 async def list_category_shop(category_id: int, operator_id: int):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
-            category = await ShopProductCategory.get(category_id)
+            category = await ShopCategory.get(category_id)
             if category:
-                await ShopProductCategory.delete(category_id)
+                await ShopCategory.delete(category_id)
                 return {"ok": True}
             else:
                 return Response("Bunday sho'p id yo'q", status.HTTP_404_NOT_FOUND)

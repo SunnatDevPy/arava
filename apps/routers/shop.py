@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, Shop, ShopPhoto, WorkTimes, ShopCategory
+from apps.models import AdminPanelUser, Shop, ShopPhoto, WorkTimes, ShopCategory, BotUser
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
@@ -85,11 +85,12 @@ async def list_category_shop(operator_id: int,
                              shop_category_id: int = Form(default=None),
                              discount_price: int = Form(default=None),
                              photo: UploadFile = File(default=None)):
-    user = await User.get(operator_id)
-    if user:
+    user = await AdminPanelUser.get(operator_id)
+    seller = AdminPanelUser.get(owner_id) # Todo filter seller
+    if user and seller:
         if user.status.value in ['moderator', "admin", "superuser"]:
             shop = await Shop.create(owner_id=owner_id, name=name, lat=lat, long=long, group_id=group_id,
-                                     shop_category_id=shop_category_id, photo=photo, work_status='CLOSE',
+                                     main_category_id=shop_category_id, photo=photo, work_status='CLOSE',
                                      rating=0, discount_price=discount_price)
             return {"ok": True, "shop_id": shop.id}
         else:
@@ -109,7 +110,7 @@ async def list_category_shop(operator_id: int,
                              shop_category_id: int = Form(default=None),
                              discount_price: int = Form(default=None),
                              photo: UploadFile = File(default=None)):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await Shop.get(shop_id)
     if user and shop:
         if photo:
@@ -133,14 +134,14 @@ async def list_category_shop(operator_id: int,
 
 @shop_router.delete(path='', name="Delete Shop")
 async def list_category_shop(operator_id: int, shop_id: int):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await Shop.get(shop_id)
     if user and shop:
         if user.status.value in ["moderator", "admin", "superuser"]:
             await Shop.delete(shop)
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+            return Response("AdminPanelUserda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -160,7 +161,7 @@ async def list_category_shop(shop_id: int) -> list[ListPhotosShopModel]:
 
 @shop_router.post(path='/photos', name="Create Shop Photo")
 async def list_category_shop(operator_id: int, shop_id: int, photo: UploadFile = File()):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await Shop.get(shop_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -177,7 +178,7 @@ async def list_category_shop(operator_id: int, shop_id: int, photo: UploadFile =
 
 @shop_router.patch(path='/photos', name="Update Shop Photo")
 async def list_category_shop(operator_id: int, shop_photo_id: int, photo: UploadFile = File()):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop_photo = await ShopPhoto.get(shop_photo_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -194,7 +195,7 @@ async def list_category_shop(operator_id: int, shop_photo_id: int, photo: Upload
 
 @shop_router.delete("/photos")
 async def user_delete(operator_id: int, shop_photo_id):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop_photo = await ShopPhoto.get(shop_photo_id)
     if user and shop_photo:
         if user.status.value in ['moderator', "admin", "superuser"]:

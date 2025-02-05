@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from apps.models import PanelProduct, PanelCategory, PanelProductPhoto
-from apps.models import User
+from apps.models import AdminPanelUser
 
 panel_product_router = APIRouter(prefix='/panel-products', tags=['Admin Panel Product'])
 
@@ -31,7 +31,7 @@ async def list_category_shop(operator_id: int,
                              shtrix_code: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     category = await PanelCategory.get(category_id)
     product = await PanelProduct.get_product_shtrix(shtrix_code)
     if product == None:
@@ -49,12 +49,12 @@ async def list_category_shop(operator_id: int,
         return Response("Shtrix kodli mahsulot bor", status.HTTP_404_NOT_FOUND)
 
 
-@panel_product_router.post(path='/photos', name="Create Product Photo")
+@panel_product_router.post(path='/photos', name="Create Product")
 async def list_category_shop(operator_id: int,
                              product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await PanelProduct.get(product_id)
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
@@ -87,7 +87,7 @@ async def list_category_shop(operator_id: int,
                              category_id: float = Form(default=None),
                              shtrix_code: int = Form(default=None),
                              photo: UploadFile = File(default=None)):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     product = await PanelProduct.get(product_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -109,7 +109,7 @@ async def list_category_shop(operator_id: int,
 
 @panel_product_router.delete(path='', name="Delete Product")
 async def list_category_shop(operator_id: int, product_id: int):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     product = await PanelProduct.get(product_id)
     if user and product:
         if user.status.value in ['moderator', "admin", "superuser"]:
@@ -130,12 +130,12 @@ async def list_category_shop(operator_id: int, product_id: int):
 #         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 #
 
-@panel_product_router.post(path='/photos', name="Create Product Photo")
+@panel_product_router.post(path='/photos', name="Create Product Photos")
 async def list_category_shop(operator_id: int,
                              product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await PanelProduct.get(product_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -155,7 +155,7 @@ async def list_category_shop(operator_id: int,
                              photo_product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     photos = await PanelProduct.get(panel_product_router)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -175,7 +175,7 @@ async def list_category_shop(operator_id: int,
 
 @panel_product_router.delete("/photos")
 async def user_delete(operator_id: int, product_photo_id: int):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
             await PanelProduct.delete(product_photo_id)

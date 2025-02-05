@@ -5,7 +5,7 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 
-from apps.models import User
+from apps.models import BotUser
 from apps.models.users import MyAddress
 from apps.routers import geolocator
 from bot.buttuns.inline import main_menu, language_inl, get_location, confirm_register_inl, menu, my_address, \
@@ -84,13 +84,12 @@ async def register_full_name(call: CallbackQuery, state: FSMContext):
     lat = data.get('lat')
     long = data.get('long')
     if confirm[0] == 'confirm':
-        user_data = {'id': from_user.id, 'username': from_user.username,
+        user_data = {'id': from_user.id, 'tg_username': from_user.username,
                      'first_name': from_user.first_name, "last_name": from_user.last_name, "long": long,
-                     "lat": lat, "contact": str(data.get('contact')),
-                     'status': "SUPERUSER" if from_user.id == 5649321700 else "USER", 'type': 'one'}
+                     "lat": lat, "contact": str(data.get('contact')), "type": "ONE"}
         location = geolocator.reverse(f"{lat}, {long}")
         address = location.raw['address']
-        await User.create(**user_data)
+        await BotUser.create(**user_data)
         await MyAddress.create(user_id=from_user.id, lat=data.get('lat'), long=data.get('long'),
                                name=f"{address['county']}, {address['neighbourhood']}, {address['road']}")
         if call.from_user.id in [5649321700, ]:
@@ -112,12 +111,13 @@ async def register_full_name(call: CallbackQuery, state: FSMContext):
 @start_router.callback_query(F.data == 'menu')
 async def register_full_name(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-    user = await User.get(call.from_user.id)
+    user = await BotUser.get(call.from_user.id)
     address = await MyAddress.get_cart_from_user(call.from_user.id)
     await call.message.answer("Mahsulotni qayerga jo'natish uchun locatsiya kiriting!", reply_markup=get_location())
     if address:
         await call.message.answer("Manzillaringizni tanlang",
                                   reply_markup=await my_address(address, call.from_user.id))
+    print(call.from_user.id, user)
     if user.type.value != "one":
         address = await MyAddress.from_user(user.id)
         await call.message.answer("Idorangizni tanlang",
@@ -133,9 +133,9 @@ async def register_full_name(message: Message, state: FSMContext):
         name = f"{address['county']}, {address['neighbourhood']}, {address['road']}"
         check_address = await MyAddress.get_from_name(name)
         if check_address == None:
-            await MyAddress.create(user_id=message.from_user.id, lat=data.get('lat'), long=data.get('long'),
+            await MyAddress.create(bot_user_id=message.from_user.id, lat=data.get('lat'), long=data.get('long'),
                                    address=name)
-        await User.update(message.from_user.id, lat=message.location.latitude, long=message.location.longitude)
+        await BotUser.update(message.from_user.id, lat=message.location.latitude, long=message.location.longitude)
         await message.answer("Xush kelibsiz", reply_markup=ReplyKeyboardRemove())
         messages: Message = await message.answer("Menu",
                                                  reply_markup=menu(message.from_user.id, language=data.get('locale')))
@@ -152,7 +152,7 @@ async def register_full_name(call: CallbackQuery, state: FSMContext):
     await call.answer()
     await state.clear()
     data = call.data.split('_')
-    await User.update(call.from_user.id, long=float(data[3]), lat=float(data[2]))
+    await BotUser.update(call.from_user.id, long=float(data[3]), lat=float(data[2]))
     if call.from_user.id in [5649321700, ]:
         messages: Message = await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
                                                       reply_markup=menu(call.from_user.id))

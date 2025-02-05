@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import ShopProductPhoto, ShopProduct, ShopProductCategory, User, Shop, PanelProduct
+from apps.models import ShopProductPhoto, ShopProduct, ShopCategory, AdminPanelUser, Shop, PanelProduct
 from apps.utils.details import get_products_utils, update_products
 
 shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
@@ -63,9 +63,9 @@ async def list_category_shop(operator_id: int,
                              one_price: int = Form(),
                              discount_price: int = Form(default=0),
                              description: str = Form(default=None)):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     product: PanelProduct = await PanelProduct.get_product_shtrix(shtrix_code)
-    category = await ShopProductCategory.get_from_shop(shop_id, shop_category_id)
+    category = await ShopCategory.get_from_shop(shop_id, shop_category_id)
     shop = await Shop.get(shop_id)
     if user and product and shop:
         if category:
@@ -100,7 +100,7 @@ async def list_category_shop(operator_id: int,
                              product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await ShopProductPhoto.get(product_id)
     if not photo.content_type.startswith("image/"):
         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
@@ -128,7 +128,7 @@ async def list_category_shop(product_id: int) -> list[PhotoModel]:
 
 @shop_product_router.get(path='/search', name="search")
 async def list_category_shop(search: Optional[str] = None, category_id: Optional[int] = None):
-    category = await ShopProductCategory.get(category_id)
+    category = await ShopCategory.get(category_id)
     if category:
         products = await ShopProduct.search_shops(search, category_id)
     else:
@@ -147,7 +147,7 @@ async def list_category_shop(operator_id: int,
                              description: str = Form(default=None),
                              photo: UploadFile = File(default=None)
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     product = await ShopProduct.get(shop_product_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -169,7 +169,7 @@ async def list_category_shop(operator_id: int,
 
 @shop_product_router.delete(path='', name="Delete Shop Products")
 async def list_category_shop(operator_id: int, shop_product_id: int):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     product = await ShopProduct.get(shop_product_id)
     if user and product:
         if user.status.value in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
@@ -195,7 +195,7 @@ async def list_category_shop(operator_id: int,
                              shop_product_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     shop = await ShopProductPhoto.get(shop_product_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -215,7 +215,7 @@ async def list_category_shop(operator_id: int,
                              shop_product_photo_id: int = Form(),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     product = await ShopProductPhoto.get(shop_product_photo_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -232,7 +232,7 @@ async def list_category_shop(operator_id: int,
 
 @shop_product_router.delete("/photos")
 async def user_delete(operator_id: int, shop_product_photo_id):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
             await ShopProductPhoto.delete(shop_product_photo_id)

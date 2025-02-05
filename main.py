@@ -8,8 +8,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse
 
 from apps.models import db
-from apps.routers import shop_product_router, panel_product_router, panel_category_router, user_router, \
-    shop_category_router, \
+from apps.routers import shop_product_router, panel_product_router, panel_category_router, bot_user_router, \
+    panel_user_router, shop_category_router, \
     main_photos_router, category_router, work_router, payment_router
 from apps.routers.cart import cart_router
 from apps.routers.orders import order_router
@@ -23,7 +23,8 @@ async def lifespan(app: FastAPI):
         os.mkdir('static')
 
     app.mount("/media", StaticFiles(directory='media'), name='media')
-    app.include_router(user_router)
+    app.include_router(panel_user_router)
+    app.include_router(bot_user_router)
     app.include_router(shop_product_router)
     # app.include_router(generate_router)
     app.include_router(shop_router)
@@ -44,13 +45,12 @@ app = FastAPI(docs_url="/docs", lifespan=lifespan)
 app.add_middleware(SessionMiddleware, secret_key=conf.SECRET_KEY)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000", "https://arava1.vercel.app"],
-    # allow_origins=["*"],
+    # allow_origins=["http://localhost:8001", "http://127.0.0.1:8001"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # minio_handler = MinioHandler(
 #     os.getenv('MINIO_URL'),

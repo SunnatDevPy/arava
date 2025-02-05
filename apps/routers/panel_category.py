@@ -5,7 +5,7 @@ from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
 
-from apps.models import User, Shop
+from apps.models import AdminPanelUser, Shop
 from apps.models.products_model import PanelCategory
 
 panel_category_router = APIRouter(prefix='/panel-category', tags=['Admin Panel Categories'])
@@ -30,7 +30,7 @@ async def list_category_shop(operator_id: int,
                              parent_id: int = Form(default=None),
                              icon_name: str = Form(default=None),
                              ):
-    seller = await User.get(operator_id)
+    seller = await AdminPanelUser.get(operator_id)
     if seller:
         if seller.status.value in ['moderator', "admin", "superuser"]:
             if parent_id == 0:
@@ -46,7 +46,7 @@ async def list_category_shop(operator_id: int,
 # # Update Category
 @panel_category_router.patch(path='', name="Update Panel Category")
 async def list_category_shop(moderator_id: int, items: Annotated[ListCategories, Form()]):
-    user = await User.get(moderator_id)
+    user = await AdminPanelUser.get(moderator_id)
     if user:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if user.status.value in ['moderator', "admin", "superuser"]:
@@ -64,7 +64,7 @@ async def list_category_shop(moderator_id: int, items: Annotated[ListCategories,
 
 @panel_category_router.delete(path='', name="Delete Category")
 async def list_category_shop(category_id: int, operator_id: int):
-    user = await User.get(operator_id)
+    user = await AdminPanelUser.get(operator_id)
     if user:
         if user.status.value in ['moderator', "admin", "superuser"]:
             category = await PanelCategory.get(category_id)

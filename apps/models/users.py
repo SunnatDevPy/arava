@@ -15,15 +15,7 @@ class MainPhoto(BaseModel):
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
 
 
-class User(BaseModel):
-    class StatusUser(str, Enum):
-        SUPERUSER = 'superuser'
-        ADMIN = 'admin'
-        USER = 'user'
-        SELLER = 'seller'
-        MODERATOR = 'moderator'
-        COURIER = 'courier'
-
+class BotUser(BaseModel):
     class TypeUser(str, Enum):
         OPTOM = 'optom'
         RESTORATOR = 'restorator'
@@ -31,12 +23,32 @@ class User(BaseModel):
 
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)
-    username: Mapped[str] = mapped_column(String(255))
+    tg_username: Mapped[str] = mapped_column(String(255), nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
 
-    status: Mapped[str] = mapped_column(SqlEnum(StatusUser), nullable=True)
     type: Mapped[str] = mapped_column(SqlEnum(TypeUser), nullable=True)
+    contact: Mapped[str] = mapped_column(nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
+
+    def __str__(self):
+        return super().__str__() + f" - {self.tg_username}"
+
+
+class AdminPanelUser(BaseModel):
+    class StatusUser(str, Enum):
+        SUPERUSER = 'superuser'
+        ADMIN = 'admin'
+        SELLER = 'seller'
+        MODERATOR = 'moderator'
+        COURIER = 'courier'
+
+    first_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    last_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    username: Mapped[str] = mapped_column(String(255), nullable=True)
+    password: Mapped[str] = mapped_column(String(255), nullable=True)
+
+    status: Mapped[str] = mapped_column(SqlEnum(StatusUser), nullable=True)
     contact: Mapped[str] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
 
@@ -45,7 +57,7 @@ class User(BaseModel):
 
 
 class MyRestaurant(BaseModel):
-    user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'))
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("bot_users.id", ondelete='CASCADE'))
     type: Mapped[str] = mapped_column(nullable=True)
     office_name: Mapped[str] = mapped_column(String, nullable=True)
     address: Mapped[str]
@@ -68,29 +80,29 @@ class MyRestaurant(BaseModel):
 
 
 class MyAddress(BaseModel):
-    user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'))
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("bot_users.id", ondelete='CASCADE'))
     address: Mapped[str] = mapped_column(String, nullable=True)
     lat: Mapped[float] = mapped_column(nullable=True)
     long: Mapped[float] = mapped_column(nullable=True)
 
 
 class Cart(BaseModel):
-    user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'))
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("bot_users.id", ondelete='CASCADE'))
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
-    count: Mapped[float] = mapped_column(nullable=True)
+    count: Mapped[int] = mapped_column(nullable=True)
     shtrix_code: Mapped[int] = mapped_column(BIGINT, nullable=True)
 
 
 class Order(BaseModel):
     class StatusOrder(str, Enum):
         NEW = "YANGI"
-        PENDING_PAYMENT = "TO'LOV KUTILMOQDA"
+        YIGILMOQDA = "Yig'ilmoqda"
         IN_PROGRESS = "YETKAZILMOQDA"
         DELIVERED = "YETKAZILDI"
         CANCELLED = "BEKOR QILINDI"
 
-    user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('users.id', ondelete='CASCADE'))
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
     payment: Mapped[bool] = mapped_column(BOOLEAN, default=False)
     payment_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('payments.id', ondelete="CASCADE"))
     payment_name: Mapped[str] = mapped_column(String, nullable=True)
